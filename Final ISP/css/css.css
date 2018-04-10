@@ -1,0 +1,274 @@
+#header li a,li,li.assignments {
+	padding-top: 15px;
+	padding-bottom: 15px;
+	margin-left: 20%;
+	color: #fff;
+	float: left;
+	text-decoration: none;
+	border-radius: 5px;
+}
+
+#header li a:hover{
+	background-color:#E5D6A7;
+	color: black;
+
+}
+#header ul {
+	list-style-type: none;
+	overflow: hidden;
+	background-color: #000;
+	color: #fff;
+}
+
+html {
+	background-color: #000;
+}
+
+#header img {
+	float: left;
+	padding-left: 40px;
+	width: 150px;
+	height: 100px;
+}
+
+#header {
+	border: dotted 2px #fff;
+}
+
+li.assignments {
+	display: inline;
+}
+
+.assignments-content {
+	display: none;
+	position: absolute;
+	background-image: url(../images/Glitter.jpg);
+	color: #fff;
+	float: left;
+	width: 100px;
+	margin-top: 4%;
+	margin-left: 2%;
+}
+
+.assignments-content a {
+	color: #fff;
+	text-decoration: none;
+	width: 150px;
+	display: block;
+	background-color: #000;
+	border: dotted 1px #fff;
+	border-left: none;
+}
+
+.assignments:hover .assignments-content {
+	display: block;
+
+}
+
+.assignments-content a:hover {
+	background-color: #B8860B;
+}
+/*------------------------------------------------------------------------------------------------*/
+#Content1{
+	color: white;
+	float: left;
+	display: inline-block;
+	width: 80%;
+	margin-left: 10%;
+	font-family: calibri;
+	background-image: url(../images/Glitter.jpg);
+	margin-top: 5%;
+	border: dotted white 2px;
+}
+p,h1{
+	background-color: black;
+	color: white;
+	padding: 40px;
+	border: dotted white 2px;
+	text-align: center;
+	font-family: calibri;
+}
+
+#howtologo{
+	display: inline-block;
+	color: white;
+	margin-top: 5%;
+	font-family: calibri;
+	width: 1000px;
+	margin-left: 15%;
+}
+.logo{
+	color:white;
+	padding: 40px;
+	border: dashed white 2px;
+	text-align: center;
+	
+
+}
+
+.tutorial{
+	width: 400px;
+	height: 250px;
+	display: inline-block;
+	border: solid 5px grey;
+	padding: 5px;
+}
+
+
+.howto{
+	display: inline-block;
+	vertical-align: top;
+	margin-left: 6%;
+	margin-top: 5%;
+	width: 400px;
+	font-weight: bold;
+	background-color: #E5D6A7;
+	color: black;
+	height: 120px;
+
+}
+#sparkle{
+	background-image: url(../images/Glitter.jpg);
+	width: 550px; 
+	display: inline-block;
+	vertical-align: top;
+	margin-left: 2%;
+
+	height: 265px;
+}
+.link{
+	color: white;
+	font-size: 20px;
+	text-decoration: none;
+	font-family: calibri;
+}
+.link:hover{
+	color: #B8860B;
+
+}
+a{
+	font-family: calibri;
+}
+
+#Content2{
+	display: inline-block;
+	color: white;
+	margin-top: 5%;
+	font-family: calibri;
+	width: 1000px;
+	margin-left: 15%;
+
+}
+.mockup{
+	height: 300px;
+	display: inline-block;
+	border: grey solid 5px;
+}
+.p2{
+	display: inline-block;
+	vertical-align: top;
+	margin-left: 10%;
+	margin-top: 5%;
+	width: 600px;
+	font-weight: bold;
+	color: white;
+	height: 120px;
+}
+
+#frame{
+	display: inline-block;
+	color: white;
+	
+	font-family: calibri;
+	width: 90%;
+	margin-left: 3%;
+	
+	border: solid 10px transparent;
+	padding:15px;
+}
+#Questions p{
+background-color: black;
+width: 1000px;
+margin-left: 10%;
+}
+
+#Questions ul{
+	list-style-type: none;
+	font-family: calibri;
+}
+#Questions{
+	background-image: url(../images/Glitter.jpg);
+}
+
+#Questions p:hover{
+	background:#B8860B ;
+}
+
+#halloween{
+	margin-left:15%; 
+	display: inline-block;
+	width:1000px;
+	height: 500px;
+	border: solid grey 5px;
+	margin-top: 3%;
+
+}
+
+#theheart{
+	width: 500px;
+	height: 600px;
+	border:solid grey 5px;
+	margin-left: 31%;
+
+}
+
+#website{
+	width: 800px;
+	height: 500px;
+	margin-left:20%;
+	margin-top: 3%;
+	border: solid grey 5px;
+	}
+
+h3{
+	background-color: black;
+	color: white;
+	padding: 40px;
+	border: dotted white 2px;
+	text-align: center;
+	font-family: calibri;
+}
+
+ol{
+	display: inline-block;
+	border: dotted white 1px;
+	background-image: url(../images/Glitter.jpg);
+	font-family: calibri;
+	width: 100%;
+}
+#radio{
+	border-radius: 10px;
+  padding: 10px;
+  margin: 0;
+  margin-left:33%;
+  width: 400px;
+  background-color: black;
+  padding: 10px;
+  border:solid #B8860B 1px;
+
+}
+.button{
+    background-color:white;
+	color:black;
+	font-family:calibri;
+	font-size:18px;
+	line-height:30px;
+	border-radius:20px;
+	-webkit-border-radius:20px;
+	-moz-border-radius:20px;
+	border:0;
+	text-shadow:#C17C3A 0 -1px 0;
+	width:120px;
+	height:32px;
+	margin-left:47%;
+}

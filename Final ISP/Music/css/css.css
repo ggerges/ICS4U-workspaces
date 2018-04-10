@@ -1,0 +1,151 @@
+body { 
+	
+	font-family: cursive;
+	font-size: small;
+	
+}
+html{
+	background-color: black;
+	color: white;
+}
+
+
+
+
+#Whatismusic{
+	display: table-cell;
+	width: 20%;
+	font-size: 100%;
+	padding: 10px;
+	vertical-align: top;
+	background-color: white;
+	margin:5px;
+	color:black;	
+}
+
+#Whatismusic h1{
+	color: black;
+}
+
+#main {
+	display: table-cell;
+	background-color: white;
+	font-size: 105%;
+	padding: 10px;
+	vertical-align: top;
+	margin:20px;
+	color: black;
+
+}
+
+#contact {
+	display: table-cell;
+	background-color: white;
+	font-size: 105%;
+	padding: 10px;
+	vertical-align: top;
+	
+	
+}
+
+#contact h1{
+	color:black;
+}
+
+
+#footer {
+	
+	color:white;
+	text-align: center;
+	padding: 15px;
+	margin: 10px;
+	font-size: 90%;
+	display:block;
+	margin-top:30%;
+}
+
+#footerr {
+	
+	color:white;
+	text-align: center;
+	padding: 15px;
+	margin: 10px;
+	font-size: 90%;
+	display:block;
+	margin-top:10%;
+}
+
+
+
+
+
+
+h1 {
+	font-size: 120%;
+	
+}
+
+h2 {
+	font-size: 110%;
+}
+
+
+a:link {
+	color: white;
+	text-decoration: none;
+
+}
+}
+html{
+	background-color: black;
+}
+
+#header li a{
+	color:white;
+	text-decoration: none;
+	padding: 20px;
+}
+
+#header li{
+	display: block;
+	float: left;
+	padding: 40px;
+	margin-left: 10%;
+}
+
+#header li a:hover{
+	background-color: white;
+	color: black;
+	border-radius: 10%;
+}
+
+
+#contact li a{
+	color:black;
+	text-decoration: none;
+	padding: 20px;
+	text-align: center;
+	
+}
+#contact li{
+	display: block;
+	float: left;
+	padding: 40px;
+	margin-left: 10%;
+	text-align: center;
+
+}
+
+#contact li a:hover{
+	background-color: black;
+	color: white;
+	border-radius: 7%;
+	
+}
+
+#oops{
+	margin-left:30%;
+	margin-top: 10%;
+	text-align: center;
+	display: inline-block;
+}

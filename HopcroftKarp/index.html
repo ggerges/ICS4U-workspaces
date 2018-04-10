@@ -1,0 +1,6334 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+	<meta charset = "UTF-8">
+	<title>Hopcroft Karp Algorithm</title>
+	<link rel="stylesheet" type="text/css" href="style/style.css">
+
+	
+</head>
+<body>
+
+<div id = "header">
+
+	<h2>The Hopcroft Karp Algorithm</h2>
+	
+
+
+</div>
+
+
+<div id = "keyTerms">
+
+
+	
+	<h3>Key Terms</h3>
+	<ul>
+		<li>Bipartite Graph</li>
+		<p>A graph that contains vertices with two sets (sets A and B) with edges that connect them and no edges between vertices of the same set</p>	
+		<li>A Matching</li>
+		<p>A set of edges without a common vertex. No vertex has the same edge destination in the second set</p>
+		<li>Not a Matching</li>
+		<p>A set of edges sharing common vertices from set a and b. More than one vertex in set a shares the same edge destination in set B</p>
+		<li>Maximul Matching</li>
+		<p>Where there is the maximum amount of edges in the matching with no augmenting paths</p>
+		<li>Augemnting path</li>
+		<p>a path (edges that you can take in a sequence to move around a graph) that starts at an unmatched vertex, and ends at an unmatched vertex</p>
+		<li>Vertex Disjoint</li>
+		<p>Given two paths, the same vertex cannot be present in both paths</p>
+		<li>A Free Vertex</li>
+		<p>A vertex with no matching edges connected to it</p>
+		<li>An Unmatched Vertex</li>
+		<p>A Vertex that is not in the current matching</p>
+
+
+
+
+	</ul>
+
+
+</div>
+
+<div id = "introduction">
+
+	
+		<h3>The Algorithm</h3>
+		<h4>Objective</h4>
+		<p>Given a bipartite graph with sets A and B, return the graph with maximal matching.</p>
+		<h4>Steps</h4>
+		<ol>
+		<li>Set Matching to empty</li>
+		<li>Enter Loop and Use Breadth First Search to build an alternating graph, starting at the unmatched vertices of set A. Matching is still empty and all vertices in both sets start unmatched.</li>
+		<li>Identify unmatched vertices in set B and add path to vertices in set A to current matching until there are no more unmatched vertices. Note that after creating a matching, all paths connected to the unmatched vertex are removed so that there are no disjointed vertices.</li>
+		<li>Add the matched vertices to our graph and you will notice that not all vertices have a matching, but can be connected to by adding another matching. We can add an augmenting path to connect these vertices.</li>
+		<li>To do this, we first identify the unmatched Vertices in set B and alternate between matched and unmatched edges until an unmatched vertice in set A is reached by using Depth First Search. If there are no unmatched vertices in either set, you have found the maximal matching and dont need to continue the search.</li>
+		<li>Remove the matching found in the augmenting path and add the unmatched edges that connected the unmatched vertices in the path.</li>
+		<li>Loop until there are no more unmatched vertices on both sides and return matching</li>
+		</ol>
+
+</div>
+
+
+
+	
+	<ul id = "buttons">
+
+
+	<li><button class="around" type="button" onclick="resetCanvas()">Reset Canvas</button></li>
+	<li><button class="around" type="button" onclick="stepOne()">Step 1</button></li>
+	<li><button class="around" type="button" onclick="stepTwo()">Step 2</button></li>
+	<li><button class="around" type="button" onclick="stepThree()">Step 3</button></li>
+	<li><button class="around" type="button" onclick="stepFour()">Step 4</button></li>
+	<li><button class="around" type="button" onclick="stepFive()">Step 5</button></li>
+	<li><button class="around" type="button" onclick="stepSix()">Step 6</button></li>
+	<li><button class="around" type="button" onclick="stepSeven()">Step 7</button></li>
+	</ul>
+	
+
+
+	<canvas id = "myCanvas" width="670" height="700"></canvas>
+	<script type="text/javascript">
+		
+		var canvas = document.getElementById("myCanvas");
+		var ctx = canvas.getContext("2d");
+		var numLetters = 5;
+		var letters = "ABCDEFGHIJK";
+		var x = 100 ;//197.5
+		var setBX;
+		var y =160;
+		var letterX = x-9.5;
+		var letterY = y+11;
+		var radius = 25;
+		var ballColour = "black";
+		var tableX = 400;
+		var tableY = 110;
+		var tableWidth = 250;
+		var tableHeight = 400;
+		var matched = "#4C58FD";
+		var unmatched = "#EE8616";
+		var removed = "#FB0808";
+
+
+
+	drawText();
+	drawDiagram(x);
+	drawEdges(x);
+	drawTable();
+
+	
+
+
+
+
+
+		function resetCanvas(){
+			
+			x = 100 ;//197.5
+			y =160;
+			letterX = x-9.5;
+			letterY = y+11;
+			radius = 25;
+			tableX = 400;
+			tableY = 110;
+
+			tableWidth = 250;
+			tableHeight = 400;;
+
+
+			ctx.clearRect(0,0,canvas.width,canvas.height);
+			drawText();
+			drawDiagram(x);
+			drawEdges(x);
+			drawTable();
+
+			
+		}
+
+	
+
+
+	function drawTable(){
+
+
+		ctx.beginPath();
+
+		ctx.strokeStyle = "black" ;
+		ctx.rect(tableX, tableY,tableWidth,tableHeight);
+		ctx.stroke();
+
+		ctx.closePath();
+
+		var startingY = tableY + 80;
+		for(var i = 0; i<numLetters-1; i++){
+
+			ctx.beginPath();
+			ctx.moveTo(tableX,startingY);
+			ctx.lineTo(tableX+tableWidth,startingY);
+			ctx.stroke();
+			ctx.closePath();
+
+			startingY += 80	 ;
+		}
+
+		startingY = tableY;	
+			ctx.beginPath();
+			ctx.moveTo(tableX+(tableWidth/2),startingY);
+			ctx.lineTo(tableX+(tableWidth/2),startingY+tableHeight);
+			ctx.stroke();
+			ctx.closePath();
+
+
+
+			startingY = tableY +50;
+		for( var i = 0; i<numLetters; i++){
+
+			ctx.font = "20px Arial";
+			ctx.fillStyle = "black";
+			ctx.fillText(letters.substring(i,i+1), tableX + 55, startingY);
+
+
+			if(i === 0){ //a
+
+				ctx.font = "20px Arial";
+				ctx.fillStyle = "black";
+				ctx.fillText("0,1,4", tableX + (tableWidth - 85), startingY);
+
+			}else if(i === 1){//b
+				ctx.font = "20px Arial";
+				ctx.fillStyle = "black";
+				ctx.fillText("2	", tableX + (tableWidth - 85), startingY);
+
+			}else if(i === 2){//c
+				ctx.font = "20px Arial";
+				ctx.fillStyle = "black";
+				ctx.fillText("3", tableX + (tableWidth - 85), startingY);
+
+			}else if(i === 3){//d
+				ctx.font = "20px Arial";
+				ctx.fillStyle = "black";
+				ctx.fillText("4,3", tableX + (tableWidth - 85), startingY);
+
+			}else{ //e
+				ctx.font = "20px Arial";
+				ctx.fillStyle = "black";
+				ctx.fillText("0,2", tableX + (tableWidth - 85), startingY);
+
+			}
+
+
+			startingY += 80;
+
+		}
+
+
+
+
+
+
+
+
+
+
+
+
+	}
+
+
+	function drawDiagram(setAX){
+
+		letterX = setAX-9.5;
+
+		ctx.font = "20px Arial";
+		ctx.fillStyle = "black";
+		ctx.fillText("SET A", setAX - 30,y-50);
+	
+
+	
+		for(var i = 0; i <numLetters; i++ ){
+
+			
+			ctx.beginPath();
+			ctx.arc(x,y,radius,0,Math.PI*2);
+			ctx.fillStyle = ballColour;
+			ctx.fill();
+			ctx.closePath();
+			
+			ctx.font = "30px Arial";
+			ctx.fillStyle = "white";
+			ctx.fillText(letters.substring(i,i+1),letterX,letterY);
+
+
+			letterY +=80;
+			y+=80;
+		}
+
+	
+		setBX = setAX + 200;
+		letterX = setBX-9.5;
+		y = 160;
+		letterY = y+11;
+
+		ctx.font = "20px Arial";
+		ctx.fillStyle = "black";
+		ctx.fillText("SET B", setBX - 30, y - 50);
+
+		for(var i = 0; i <numLetters; i++ ){
+
+				
+				ctx.beginPath();
+				ctx.fillStyle = ballColour;
+				ctx.arc(setBX,y,radius,0,Math.PI*2);
+		
+				ctx.fill();
+				ctx.closePath();
+				
+				ctx.font = "30px Arial";
+				ctx.fillStyle = "white";
+				ctx.fillText(i,letterX,letterY);
+
+
+				letterY +=80;
+				y+=80;
+			}
+
+	}
+
+
+	function drawEdges(startX){
+		//edges
+
+		ctx.strokeStyle = "black";
+
+		 x = startX + radius ;//197.5
+		 y = 160  ;
+
+
+		for(var i = 0; i<numLetters; i++){
+
+
+			if(i === 0){ //a
+
+				ctx.beginPath();
+				ctx.moveTo(x,y);
+				//to 0
+				ctx.lineTo(x+175 - radius,y);
+				ctx.stroke();
+
+				//to 1
+				ctx.moveTo(x,y);
+				ctx.lineTo(x+175  - radius, y+80);
+				ctx.stroke();
+
+				//to 4
+				ctx.moveTo(x,y);
+				ctx.lineTo(x+175 - radius, y + (80*4));
+				ctx.stroke();
+
+
+				ctx.closePath();
+
+			}else if(i === 1){//b
+				
+				//to 2
+				ctx.beginPath();
+				ctx.moveTo(x,y);
+				ctx.lineTo(x+175 -radius, y+80);
+				ctx.stroke();
+
+				ctx.closePath();
+
+			}else if(i === 2){//c
+				
+				//to 3
+				ctx.beginPath();
+				ctx.moveTo(x,y);
+				ctx.lineTo(x+175 -radius, y+80);
+				ctx.stroke();
+
+				ctx.closePath();
+
+			}else if(i === 3){//d
+				
+				//to 4
+				ctx.beginPath();
+				ctx.moveTo(x,y);
+				ctx.lineTo(x+175 -radius, y+80);
+				ctx.stroke();
+
+				//to 3
+				ctx.moveTo(x,y);
+				ctx.lineTo(x+175 -radius, y);
+				ctx.stroke();
+
+				ctx.closePath();
+
+			}else{ //e
+
+				//to 0
+				ctx.beginPath();
+				ctx.moveTo(x,y);
+				ctx.lineTo(x+175 -radius, y - (80*4));
+				ctx.stroke();
+
+				//to 2
+				ctx.moveTo(x,y);
+				ctx.lineTo(x+175 -radius, y - (80*2));
+				ctx.stroke();
+
+
+
+
+				ctx.closePath();
+
+				
+
+			}
+
+
+			y+=80;
+
+
+
+		}
+
+	}
+
+	function drawText(){
+		ctx.font = "30px Arial";
+		ctx.fillStyle = "black";
+		ctx.fillText("The Hopcroft Karp Algorithm", 20,35);
+		ctx.beginPath();
+		ctx.strokeStyle = "black";
+		ctx.moveTo(10,50);	
+		ctx.lineTo(660,50);
+		ctx.stroke();
+		ctx.closePath();
+
+
+	}
+
+
+
+
+	function stepOne(){
+
+			ctx.clearRect(0,0,canvas.width,canvas.height);
+			x = 100 ;//197.5
+			y =160;
+			letterX = x-9.5;
+			letterY = y+11;
+			radius = 25;
+			tableX = 400;
+			tableY = 140;
+
+			tableWidth = 250;
+			tableHeight = 400;;
+
+			drawText();
+			drawDiagram(x);
+			drawEdges(x);
+			
+
+
+
+			//ctx.beginPath();
+			//ctx.rect(43,565,335,50);
+			//ctx.stroke();
+			//ctx.closePath();
+
+			//ctx.font = "30px Arial";
+			//ctx.fillStyle = "black";
+			//ctx.fillText("Set Matching to empty	", 50,600);
+
+			ctx.font = "20px Arial";
+			ctx.fillStyle = "black";
+			ctx.fillText("Matching M = empty", 420	,100)
+
+			ctx.beginPath();
+			ctx.fillStyle = "black";
+			ctx.rect(400,140,250,50);
+			ctx.fill();
+			ctx.closePath();
+
+			ctx.font = "30px Arial";
+			ctx.fillStyle = "white";
+			ctx.fillText("M",510,175);
+
+	}
+
+
+
+
+	function stepTwo(){
+
+			ctx.clearRect(0,0,canvas.width,canvas.height);
+			x = 50 ;//197.5
+			y =160;
+			letterX = x-9.5;
+			letterY = y+11;
+			radius = 25;
+			tableX = 400;
+			tableY = 140;
+			ballColour = "black";
+
+			tableWidth = 250;
+			tableHeight = 400;;
+
+			drawText();
+			drawDiagram(x);
+			drawEdges(x);
+		
+
+
+
+			//ctx.beginPath();
+			//ctx.rect(43,565,335,50);
+			//ctx.stroke();
+			//ctx.closePath();
+
+			//ctx.font = "30px Arial";
+			//ctx.fillStyle = "black";
+			//ctx.fillText("Build Graph using BFS	", 50,600);
+
+
+			ctx.beginPath();
+			ctx.rect(320,70,315,50);
+			ctx.stroke();
+			ctx.closePath();
+
+			ctx.font = "30px Arial";
+			ctx.fillStyle = "black";
+			ctx.fillText("FIRST ITERATION", 347,110);
+
+
+
+
+			ballColour = "black";
+
+			bfsIterationOne(ballColour);
+
+
+			ctx.beginPath();
+			ctx.fillStyle = "black";
+			ctx.rect(360,370,250,50);
+			ctx.fill();
+			ctx.closePath();
+
+			ctx.font = "30px Arial";
+			ctx.fillStyle = "white";
+			ctx.fillText("M",470,405);
+
+
+	}
+
+
+	function bfsIterationOne(newBallColour){
+
+
+			x = 335 ;//197.5
+			y =160;
+			letterX = x-9.5;
+			letterY = y+11;
+			radius = 20;
+
+
+			//set A
+			for(var i = 0; i<numLetters; i ++){
+
+
+				ctx.beginPath();
+				ctx.fillStyle = "grey";
+				ctx.arc(x,y,radius,0,2*Math.PI);
+				ctx.fill();
+
+				ctx.beginPath();
+				ctx.strokeStyle = "black";
+				ctx.arc(x,y,radius,0,2*Math.PI);
+				ctx.stroke();
+
+				ctx.fontStyle = "10px Arial";
+				ctx.fillStyle = "white";
+				ctx.fillText(letters.substring(i,i+1), letterX,letterY);
+
+
+				x+=70;
+				letterX = x-9.5;
+			}
+
+			//set B
+
+			x = 335;
+			y = 160 + 150;
+			letterY = y+11;
+			letterX = x-9.5;
+
+			for(var i = 0; i<numLetters; i ++){
+
+
+				ctx.beginPath();
+				ctx.fillStyle = ballColour;
+				ctx.arc(x,y,radius,0,2*Math.PI);
+				ctx.fill();
+
+				ctx.beginPath();
+				ctx.strokeStyle = "black";
+				ctx.arc(x,y,radius,0,2*Math.PI);
+				ctx.stroke();
+
+
+				ctx.fontStyle = "10px Arial";
+				ctx.fillStyle = "white";
+				ctx.fillText(i, letterX,letterY);
+
+
+				x+=70;
+				letterX = x-9.5;
+			}
+
+
+			 x = 335 ;//197.5
+			 y = 160 +radius;
+
+
+			for(var i = 0; i<numLetters; i++){
+
+
+				if(i === 0){ //a
+
+					ctx.beginPath();
+					ctx.moveTo(x,y);
+					//to 0
+					ctx.lineTo(x,y + 150 - radius*2);
+					ctx.stroke();
+
+		
+
+					//to 1
+					ctx.beginPath();
+					ctx.moveTo(x,y);
+					ctx.lineTo(x+70, y+ 150 - radius*2);
+					ctx.stroke();
+					
+					ctx.closePath();
+
+					//to 4
+					ctx.beginPath();
+					
+					ctx.moveTo(x,y);
+					ctx.lineTo(x+ 70*4, y +150 - radius*2);
+					ctx.stroke();
+				
+					ctx.closePath();
+
+				}else if(i === 1){//b
+					
+					//to 2
+					ctx.beginPath();
+					ctx.moveTo(x,y);
+					ctx.lineTo(x + 70,y + 150 - radius*2);
+					ctx.stroke();
+
+					ctx.closePath();
+
+				}else if(i === 2){//c
+					
+					//to 3
+					ctx.beginPath();
+					ctx.moveTo(x,y);
+					ctx.lineTo(x + 70,y + 150 - radius*2);
+					ctx.stroke();
+
+					ctx.closePath();
+
+				}else if(i === 3){//d
+					
+					//to 4
+					ctx.beginPath();
+					ctx.moveTo(x,y);
+					ctx.lineTo(x + 70,y + 150 - radius*2);
+					ctx.stroke();
+
+					//to 3
+					ctx.moveTo(x,y);
+					ctx.lineTo(x,y + 150 - radius*2);
+					ctx.stroke();
+
+					ctx.closePath();
+
+				}else{ //e
+
+					//to 0
+					ctx.beginPath();
+					
+					ctx.moveTo(x,y);
+					
+					ctx.lineTo(x - 70*4,y + 150 - radius*2);
+					ctx.stroke();
+						
+					ctx.closePath();
+
+
+					//to 2
+					ctx.beginPath();
+					ctx.moveTo(x,y);
+					ctx.lineTo(x - 70*2,y + 150 - radius*2);
+					ctx.stroke();
+
+
+
+
+					ctx.closePath();
+
+					
+
+				}
+
+
+				x+=70;
+
+
+
+			}
+
+
+	}
+
+
+
+	function stepThree(){
+
+		ctx.clearRect(0,0,canvas.width,canvas.height);
+				x = 50 ;//197.5
+				y =160;
+				letterX = x-9.5;
+				letterY = y+11;
+				radius = 25;
+				tableX = 400;
+				tableY = 140;
+			ballColour = "black";
+				tableWidth = 250;
+				tableHeight = 400;;
+
+			drawText();
+			drawDiagram(x);
+			drawEdges(x);
+		
+
+
+
+			//ctx.beginPath();
+			//ctx.rect(43,565,335,50);
+			//ctx.stroke();
+			//ctx.closePath();
+
+			//ctx.font = "30px Arial";
+			//ctx.fillStyle = "black";
+			//ctx.fillText("Build Graph using BFS	", 50,600);
+
+
+			ctx.beginPath();
+			ctx.rect(320,70,315,50);
+			ctx.stroke();
+			ctx.closePath();
+
+			ctx.font = "30px Arial";
+			ctx.fillStyle = "black";
+			ctx.fillText("FIRST ITERATION", 347,110);
+
+
+
+
+
+			ballColour = "#EE8616";
+			bfsIterationOne(ballColour);
+
+			ctx.beginPath();
+			ctx.fillStyle = unmatched; 
+			ctx.rect(25,550,25,25);
+			ctx.fill();
+			ctx.closePath();
+
+			ctx.beginPath();
+			ctx.strokeStyle = "black"; 
+			ctx.rect(25,550,25,25);
+			ctx.stroke();
+			ctx.closePath();
+
+			ctx.font = "20px Arial";
+			ctx.fillStyle = "black";
+			ctx.fillText(" = UNMATCHED VERTICES", 50,570);
+
+
+			ctx.beginPath();
+			ctx.fillStyle = matched; 
+			ctx.rect(25,590,25,25);
+			ctx.fill();
+			ctx.closePath();
+
+			ctx.beginPath();
+			ctx.strokeStyle = "black"; 
+			ctx.rect(25,590,25,25);
+			ctx.stroke();
+			ctx.closePath();
+
+			ctx.font = "20px Arial";
+			ctx.fillStyle = "black";
+			ctx.fillText(" = MATCHING ", 50,610);
+
+			ctx.beginPath();
+			ctx.fillStyle = removed; 
+			ctx.rect(25,630,25,25);
+			ctx.fill();
+			ctx.closePath();
+
+			ctx.beginPath();
+			ctx.strokeStyle = "black"; 
+			ctx.rect(25,630,25,25);
+			ctx.stroke();
+			ctx.closePath();
+
+			ctx.font = "20px Arial";
+			ctx.fillStyle = "black";
+			ctx.fillText(" = REMOVED PATH ", 50,650);
+
+		
+
+			ctx.beginPath();
+			ctx.fillStyle = "black";
+			ctx.rect(360,370,250,50);
+			ctx.fill();
+			ctx.closePath();
+
+			ctx.font = "30px Arial";
+			ctx.fillStyle = "white";
+			ctx.fillText("M",470,405);
+
+
+			setTimeout(bfsMatchedUnmatchedA1, 1500);
+
+			setTimeout(bfsMatchedUnmatchedB1,3000);
+
+			setTimeout(bfsMatchedUnmatchedC1,4500);
+
+			setTimeout(bfsMatchedUnmatchedD1,6000);
+			
+
+
+	}
+
+
+	function bfsMatchedUnmatchedA1(){
+
+
+			ctx.clearRect(0,0,canvas.width,canvas.height);
+			x = 50 ;//197.5
+			y =160;
+			letterX = x-9.5;
+			letterY = y+11;
+			radius = 25;
+			tableX = 400;
+			tableY = 140;
+			ballColour = "black";
+			tableWidth = 250;
+			tableHeight = 400;
+
+			drawText();
+			drawDiagram(x);
+			drawEdges(x);
+			ctx.beginPath();
+			ctx.rect(320,70,315,50);
+			ctx.stroke();
+			ctx.closePath();
+
+			ctx.font = "30px Arial";
+			ctx.fillStyle = "black";
+			ctx.fillText("FIRST ITERATION", 347,110);
+			
+			ballColour = "#EE8616";
+			ctx.beginPath();
+			ctx.fillStyle = unmatched; 
+			ctx.rect(25,550,25,25);
+			ctx.fill();
+			ctx.closePath();
+
+			ctx.beginPath();
+			ctx.strokeStyle = "black"; 
+			ctx.rect(25,550,25,25);
+			ctx.stroke();
+			ctx.closePath();
+
+			ctx.font = "20px Arial";
+			ctx.fillStyle = "black";
+			ctx.fillText(" = UNMATCHED VERTICES", 50,570);
+
+
+			ctx.beginPath();
+			ctx.fillStyle = matched; 
+			ctx.rect(25,590,25,25);
+			ctx.fill();
+			ctx.closePath();
+
+			ctx.beginPath();
+			ctx.strokeStyle = "black"; 
+			ctx.rect(25,590,25,25);
+			ctx.stroke();
+			ctx.closePath();
+
+			ctx.font = "20px Arial";
+			ctx.fillStyle = "black";
+			ctx.fillText(" = MATCHING ", 50,610);
+
+			ctx.beginPath();
+			ctx.fillStyle = removed; 
+			ctx.rect(25,630,25,25);
+			ctx.fill();
+			ctx.closePath();
+
+			ctx.beginPath();
+			ctx.strokeStyle = "black"; 
+			ctx.rect(25,630,25,25);
+			ctx.stroke();
+			ctx.closePath();
+
+			ctx.font = "20px Arial";
+			ctx.fillStyle = "black";
+			ctx.fillText(" = REMOVED PATH ", 50,650);
+
+	
+
+			ctx.beginPath();
+			ctx.fillStyle = "black";
+			ctx.rect(360,370,250,50);
+			ctx.fill();
+			ctx.closePath();
+
+			ctx.font = "30px Arial";
+			ctx.fillStyle = "white";
+			ctx.fillText("M",470,405);
+
+
+			x = 335 ;//197.5
+			y =160;
+			letterX = x-9.5;
+			letterY = y+11;
+			radius = 20;
+
+
+			//set A
+			for(var i = 0; i<numLetters; i ++){
+
+
+				ctx.beginPath();
+				ctx.fillStyle = "grey";
+				ctx.arc(x,y,radius,0,2*Math.PI);
+				ctx.fill();
+
+				ctx.beginPath();
+				ctx.strokeStyle = "black";
+				ctx.arc(x,y,radius,0,2*Math.PI);
+				ctx.stroke();
+
+				ctx.fontStyle = "10px Arial";
+				ctx.fillStyle = "white";
+				ctx.fillText(letters.substring(i,i+1), letterX,letterY);
+
+
+				x+=70;
+				letterX = x-9.5;
+			}
+
+			//set B
+
+			x = 335;
+			y = 160 + 150;
+			letterY = y+11;
+			letterX = x-9.5;
+
+			for(var i = 0; i<numLetters; i ++){
+
+
+				ctx.beginPath();
+				ctx.fillStyle = ballColour;
+				ctx.arc(x,y,radius,0,2*Math.PI);
+				ctx.fill();
+
+				ctx.beginPath();
+				ctx.strokeStyle = "black";
+				ctx.arc(x,y,radius,0,2*Math.PI);
+				ctx.stroke();
+
+
+				ctx.fontStyle = "10px Arial";
+				ctx.fillStyle = "white";
+				ctx.fillText(i, letterX,letterY);
+
+
+				x+=70;
+				letterX = x-9.5;
+			}
+
+
+			 x = 335 ;//197.5
+			 y = 160 +radius;
+
+
+			for(var i = 0; i<numLetters; i++){
+
+
+			if(i === 0){ //a
+
+				ctx.beginPath();
+				ctx.save();
+				ctx.moveTo(x,y);
+				ctx.strokeStyle = "#4C58FD";
+				//to 0
+				ctx.lineTo(x,y + 150 - radius*2);
+				ctx.stroke();
+				ctx.restore();
+				ctx.closePath();
+
+				//to 1
+				ctx.beginPath();
+				ctx.save();
+				ctx.setLineDash([5, 3]);
+				ctx.strokeStyle = "#FB0808" ;
+				ctx.moveTo(x,y);
+				ctx.lineTo(x+70, y+ 150 - radius*2);
+				ctx.stroke();
+				ctx.restore();
+				ctx.closePath();
+
+				//to 4
+				ctx.beginPath();
+				ctx.save();
+				ctx.setLineDash([5, 3]);
+				ctx.strokeStyle = "#FB0808" ;
+				ctx.moveTo(x,y);
+				ctx.lineTo(x+ 70*4, y +150 - radius*2);
+				ctx.stroke();
+				ctx.restore();
+				ctx.closePath();
+
+			}else if(i === 1){//b
+				
+				//to 2
+				ctx.beginPath();
+				ctx.moveTo(x,y);
+				ctx.lineTo(x + 70,y + 150 - radius*2);
+				ctx.stroke();
+
+				ctx.closePath();
+
+			}else if(i === 2){//c
+				
+				//to 3
+				ctx.beginPath();
+				ctx.moveTo(x,y);
+				ctx.lineTo(x + 70,y + 150 - radius*2);
+				ctx.stroke();
+
+				ctx.closePath();
+
+			}else if(i === 3){//d
+				
+				//to 4
+				ctx.beginPath();
+				ctx.moveTo(x,y);
+				ctx.lineTo(x + 70,y + 150 - radius*2);
+				ctx.stroke();
+
+				//to 3
+				ctx.moveTo(x,y);
+				ctx.lineTo(x,y + 150 - radius*2);
+				ctx.stroke();
+
+				ctx.closePath();
+
+			}else{ //e
+
+				//to 0
+				ctx.beginPath();
+				ctx.save();
+				ctx.moveTo(x,y);
+				ctx.setLineDash([5, 3]);
+				ctx.strokeStyle = "#FB0808" ;
+				ctx.lineTo(x - 70*4,y + 150 - radius*2);
+				ctx.stroke();
+				ctx.restore();
+				ctx.closePath();
+
+
+				//to 2
+				ctx.beginPath();
+				ctx.moveTo(x,y);
+				ctx.lineTo(x - 70*2,y + 150 - radius*2);
+				ctx.stroke();
+
+
+
+
+				ctx.closePath();
+
+				
+
+			}
+
+
+			x+=70;
+
+			}
+
+		
+
+			x = 410 ;//197.5
+			y =460;
+
+			letterX = x-9.5;
+			letterY = y+11;
+
+			ctx.beginPath();
+			ctx.fillStyle = "grey";
+			ctx.arc(x,y,radius,0,2*Math.PI);
+			ctx.fill();
+			ctx.closePath();
+
+			ctx.beginPath();
+			ctx.strokeStyle = "black";
+			ctx.arc(x,y,radius,0,2*Math.PI);
+			ctx.stroke();
+			ctx.closePath();
+
+
+			ctx.font = "30px Arial"
+			ctx.fillStyle = "white";
+			ctx.fillText("A", letterX, letterY);
+
+			x += 150;
+			letterX = x -9.5;
+
+
+			ctx.beginPath();
+			ctx.fillStyle = "grey";
+			ctx.arc(x,y,radius,0,2*Math.PI);
+			ctx.fill();
+			ctx.closePath();
+
+			ctx.beginPath();
+			ctx.strokeStyle = "black";
+			ctx.arc(x,y,radius,0,2*Math.PI);
+			ctx.stroke();
+			ctx.closePath();
+
+
+			ctx.font = "30px Arial"
+			ctx.fillStyle = "white";
+			ctx.fillText("0", letterX, letterY);
+
+
+			x = 410;
+
+			ctx.beginPath();
+			ctx.strokeStyle = "#4C58FD"
+			ctx.moveTo(x+radius,y);
+			ctx.lineTo(x + 150-radius, y);
+			ctx.stroke();
+		
+	}
+
+
+	function bfsMatchedUnmatchedB1(){
+
+
+			ctx.clearRect(0,0,canvas.width,canvas.height);
+			x = 50 ;//197.5
+			y =160;
+			letterX = x-9.5;
+			letterY = y+11;
+			radius = 25;
+			tableX = 400;
+			tableY = 140;
+			ballColour = "black";
+			tableWidth = 250;
+			tableHeight = 400;
+
+			drawText();
+			drawDiagram(x);
+			drawEdges(x);
+			ctx.beginPath();
+			ctx.rect(320,70,315,50);
+			ctx.stroke();
+			ctx.closePath();
+
+			ctx.font = "30px Arial";
+			ctx.fillStyle = "black";
+			ctx.fillText("FIRST ITERATION", 347,110);
+
+
+
+
+
+			ballColour = "#EE8616";
+		
+
+			ctx.beginPath();
+			ctx.fillStyle = unmatched; 
+			ctx.rect(25,550,25,25);
+			ctx.fill();
+			ctx.closePath();
+
+			ctx.beginPath();
+			ctx.strokeStyle = "black"; 
+			ctx.rect(25,550,25,25);
+			ctx.stroke();
+			ctx.closePath();
+
+			ctx.font = "20px Arial";
+			ctx.fillStyle = "black";
+			ctx.fillText(" = UNMATCHED VERTICES", 50,570);
+
+
+			ctx.beginPath();
+			ctx.fillStyle = matched; 
+			ctx.rect(25,590,25,25);
+			ctx.fill();
+			ctx.closePath();
+
+			ctx.beginPath();
+			ctx.strokeStyle = "black"; 
+			ctx.rect(25,590,25,25);
+			ctx.stroke();
+			ctx.closePath();
+
+			ctx.font = "20px Arial";
+			ctx.fillStyle = "black";
+			ctx.fillText(" = MATCHING ", 50,610);
+
+			ctx.beginPath();
+			ctx.fillStyle = removed; 
+			ctx.rect(25,630,25,25);
+			ctx.fill();
+			ctx.closePath();
+
+			ctx.beginPath();
+			ctx.strokeStyle = "black"; 
+			ctx.rect(25,630,25,25);
+			ctx.stroke();
+			ctx.closePath();
+
+			ctx.font = "20px Arial";
+			ctx.fillStyle = "black";
+			ctx.fillText(" = REMOVED PATH ", 50,650);
+
+		
+
+			ctx.beginPath();
+			ctx.fillStyle = "black";
+			ctx.rect(360,370,250,50);
+			ctx.fill();
+			ctx.closePath();
+
+			ctx.font = "30px Arial";
+			ctx.fillStyle = "white";
+			ctx.fillText("M",470,405);
+
+
+				x = 335 ;//197.5
+				y =160;
+				letterX = x-9.5;
+				letterY = y+11;
+				radius = 20;
+
+
+				//set A
+				for(var i = 0; i<numLetters; i ++){
+
+
+					ctx.beginPath();
+					ctx.fillStyle = "grey";
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.fill();
+
+					ctx.beginPath();
+					ctx.strokeStyle = "black";
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.stroke();
+
+					ctx.fontStyle = "10px Arial";
+					ctx.fillStyle = "white";
+					ctx.fillText(letters.substring(i,i+1), letterX,letterY);
+
+
+					x+=70;
+					letterX = x-9.5;
+				}
+
+				//set B
+
+				x = 335;
+				y = 160 + 150;
+				letterY = y+11;
+				letterX = x-9.5;
+
+				for(var i = 0; i<numLetters; i ++){
+
+
+					ctx.beginPath();
+					ctx.fillStyle = ballColour;
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.fill();
+
+					ctx.beginPath();
+					ctx.strokeStyle = "black";
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.stroke();
+
+
+					ctx.fontStyle = "10px Arial";
+					ctx.fillStyle = "white";
+					ctx.fillText(i, letterX,letterY);
+
+
+					x+=70;
+					letterX = x-9.5;
+				}
+
+
+				 x = 335 ;//197.5
+				 y = 160 +radius;
+
+
+			for(var i = 0; i<numLetters; i++){
+
+
+				if(i === 0){ //a
+
+					ctx.beginPath();
+					ctx.save();
+					ctx.moveTo(x,y);
+					ctx.strokeStyle = "#4C58FD";
+					//to 0
+					ctx.lineTo(x,y + 150 - radius*2);
+					ctx.stroke();
+					ctx.restore();
+					ctx.closePath();
+
+					//to 1
+					ctx.beginPath();
+					ctx.save();
+					ctx.setLineDash([5, 3]);
+					ctx.strokeStyle = "#FB0808" ;
+					ctx.moveTo(x,y);
+					ctx.lineTo(x+70, y+ 150 - radius*2);
+					ctx.stroke();
+					ctx.restore();
+					ctx.closePath();
+
+					//to 4
+					ctx.beginPath();
+					ctx.save();
+					ctx.setLineDash([5, 3]);
+					ctx.strokeStyle = "#FB0808" ;
+					ctx.moveTo(x,y);
+					ctx.lineTo(x+ 70*4, y +150 - radius*2);
+					ctx.stroke();
+					ctx.restore();
+					ctx.closePath();
+
+				}else if(i === 1){//b
+					
+					//to 2
+					ctx.beginPath();
+					ctx.strokeStyle = matched; 
+					ctx.moveTo(x,y);
+					ctx.lineTo(x + 70,y + 150 - radius*2);
+					ctx.stroke();
+					ctx.closePath();
+
+				}else if(i === 2){//c
+					
+					//to 3
+					ctx.beginPath();
+					ctx.strokeStyle = "black";
+					ctx.moveTo(x,y);
+					ctx.lineTo(x + 70,y + 150 - radius*2);
+					ctx.stroke();
+
+					ctx.closePath();
+
+				}else if(i === 3){//d
+					
+					//to 4
+					ctx.beginPath();
+					ctx.moveTo(x,y);
+					ctx.lineTo(x + 70,y + 150 - radius*2);
+					ctx.stroke();
+
+					//to 3
+					ctx.moveTo(x,y);
+					ctx.lineTo(x,y + 150 - radius*2);
+					ctx.stroke();
+					ctx.closePath();
+
+				}else{ //e
+
+					//to 0
+					ctx.beginPath();
+					ctx.save();
+					ctx.moveTo(x,y);
+					ctx.setLineDash([5, 3]);
+					ctx.strokeStyle = removed ;
+					ctx.lineTo(x - 70*4,y + 150 - radius*2);
+					ctx.stroke();
+					ctx.restore();
+					ctx.closePath();
+
+
+					//to 2
+					ctx.beginPath();
+					ctx.save();
+					ctx.moveTo(x,y);
+					ctx.setLineDash([5,3]);
+					ctx.strokeStyle = removed;
+					ctx.lineTo(x - 70*2,y + 150 - radius*2);
+					ctx.stroke();
+					ctx.restore();
+					ctx.closePath();
+
+					
+
+				}
+
+
+				x+=70;
+
+				}
+
+			
+
+				x = 410 ;//197.5
+				y =460;
+
+				letterX = x-9.5;
+				letterY = y+11;
+
+			ctx.beginPath();
+			ctx.fillStyle = "grey";
+			ctx.arc(x,y,radius,0,2*Math.PI);
+			ctx.fill();
+			ctx.closePath();
+
+			ctx.beginPath();
+			ctx.strokeStyle = "black";
+			ctx.arc(x,y,radius,0,2*Math.PI);
+			ctx.stroke();
+			ctx.closePath();
+
+
+			ctx.font = "30px Arial"
+			ctx.fillStyle = "white";
+			ctx.fillText("A", letterX, letterY);
+
+			x += 150;
+			letterX = x -9.5;
+
+
+			ctx.beginPath();
+			ctx.fillStyle = "grey";
+			ctx.arc(x,y,radius,0,2*Math.PI);
+			ctx.fill();
+			ctx.closePath();
+
+			ctx.beginPath();
+			ctx.strokeStyle = "black";
+			ctx.arc(x,y,radius,0,2*Math.PI);
+			ctx.stroke();
+			ctx.closePath();
+
+
+			ctx.font = "30px Arial"
+			ctx.fillStyle = "white";
+			ctx.fillText("0", letterX, letterY);
+
+
+			x = 410;
+
+			ctx.beginPath();
+			ctx.strokeStyle = "#4C58FD"
+			ctx.moveTo(x+radius,y);
+			ctx.lineTo(x + 150-radius, y);
+			ctx.stroke();
+
+			x = 410 ;//197.5
+				y =515;
+
+				letterX = x-9.5;
+				letterY = y+11;
+
+			ctx.beginPath();
+			ctx.fillStyle = "grey";
+			ctx.arc(x,y,radius,0,2*Math.PI);
+			ctx.fill();
+			ctx.closePath();
+
+			ctx.beginPath();
+			ctx.strokeStyle = "black";
+			ctx.arc(x,y,radius,0,2*Math.PI);
+			ctx.stroke();
+			ctx.closePath();
+
+
+			ctx.font = "30px Arial"
+			ctx.fillStyle = "white";
+			ctx.fillText("B", letterX, letterY);
+
+			x += 150;
+			letterX = x -9.5;
+
+
+			ctx.beginPath();
+			ctx.fillStyle = "grey";
+			ctx.arc(x,y,radius,0,2*Math.PI);
+			ctx.fill();
+			ctx.closePath();
+
+			ctx.beginPath();
+			ctx.strokeStyle = "black";
+			ctx.arc(x,y,radius,0,2*Math.PI);
+			ctx.stroke();
+			ctx.closePath();
+
+
+			ctx.font = "30px Arial"
+			ctx.fillStyle = "white";
+			ctx.fillText("2", letterX, letterY);
+
+
+			x = 410;
+
+			ctx.beginPath();
+			ctx.strokeStyle = "#4C58FD"
+			ctx.moveTo(x+radius,y);
+			ctx.lineTo(x + 150-radius, y);
+			ctx.stroke();
+
+	}
+
+
+	function bfsMatchedUnmatchedC1(){
+
+
+			ctx.clearRect(0,0,canvas.width,canvas.height);
+			x = 50 ;//197.5
+			y =160;
+			letterX = x-9.5;
+			letterY = y+11;
+			radius = 25;
+			tableX = 400;
+			tableY = 140;
+			ballColour = "black";
+			tableWidth = 250;
+			tableHeight = 400;
+
+			drawText();
+			drawDiagram(x);
+			drawEdges(x);
+			ctx.beginPath();
+			ctx.rect(320,70,315,50);
+			ctx.stroke();
+			ctx.closePath();
+
+			ctx.font = "30px Arial";
+			ctx.fillStyle = "black";
+			ctx.fillText("FIRST ITERATION", 347,110);
+
+
+
+
+
+			ballColour = "#EE8616";
+		
+
+			ctx.beginPath();
+			ctx.fillStyle = unmatched; 
+			ctx.rect(25,550,25,25);
+			ctx.fill();
+			ctx.closePath();
+
+			ctx.beginPath();
+			ctx.strokeStyle = "black"; 
+			ctx.rect(25,550,25,25);
+			ctx.stroke();
+			ctx.closePath();
+
+			ctx.font = "20px Arial";
+			ctx.fillStyle = "black";
+			ctx.fillText(" = UNMATCHED VERTICES", 50,570);
+
+
+			ctx.beginPath();
+			ctx.fillStyle = matched; 
+			ctx.rect(25,590,25,25);
+			ctx.fill();
+			ctx.closePath();
+
+			ctx.beginPath();
+			ctx.strokeStyle = "black"; 
+			ctx.rect(25,590,25,25);
+			ctx.stroke();
+			ctx.closePath();
+
+			ctx.font = "20px Arial";
+			ctx.fillStyle = "black";
+			ctx.fillText(" = MATCHING ", 50,610);
+
+			ctx.beginPath();
+			ctx.fillStyle = removed; 
+			ctx.rect(25,630,25,25);
+			ctx.fill();
+			ctx.closePath();
+
+			ctx.beginPath();
+			ctx.strokeStyle = "black"; 
+			ctx.rect(25,630,25,25);
+			ctx.stroke();
+			ctx.closePath();
+
+			ctx.font = "20px Arial";
+			ctx.fillStyle = "black";
+			ctx.fillText(" = REMOVED PATH ", 50,650);
+
+		
+
+			ctx.beginPath();
+			ctx.fillStyle = "black";
+			ctx.rect(360,370,250,50);
+			ctx.fill();
+			ctx.closePath();
+
+			ctx.font = "30px Arial";
+			ctx.fillStyle = "white";
+			ctx.fillText("M",470,405);
+
+
+				x = 335 ;//197.5
+				y =160;
+				letterX = x-9.5;
+				letterY = y+11;
+				radius = 20;
+
+
+				//set A
+				for(var i = 0; i<numLetters; i ++){
+
+
+					ctx.beginPath();
+					ctx.fillStyle = "grey";
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.fill();
+
+					ctx.beginPath();
+					ctx.strokeStyle = "black";
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.stroke();
+
+					ctx.fontStyle = "10px Arial";
+					ctx.fillStyle = "white";
+					ctx.fillText(letters.substring(i,i+1), letterX,letterY);
+
+
+					x+=70;
+					letterX = x-9.5;
+				}
+
+				//set B
+
+				x = 335;
+				y = 160 + 150;
+				letterY = y+11;
+				letterX = x-9.5;
+
+				for(var i = 0; i<numLetters; i ++){
+
+
+					ctx.beginPath();
+					ctx.fillStyle = ballColour;
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.fill();
+
+					ctx.beginPath();
+					ctx.strokeStyle = "black";
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.stroke();
+
+
+					ctx.fontStyle = "10px Arial";
+					ctx.fillStyle = "white";
+					ctx.fillText(i, letterX,letterY);
+
+
+					x+=70;
+					letterX = x-9.5;
+				}
+
+
+				 x = 335 ;//197.5
+				 y = 160 +radius;
+
+
+			for(var i = 0; i<numLetters; i++){
+
+
+				if(i === 0){ //a
+
+					ctx.beginPath();
+					ctx.save();
+					ctx.moveTo(x,y);
+					ctx.strokeStyle = "#4C58FD";
+					//to 0
+					ctx.lineTo(x,y + 150 - radius*2);
+					ctx.stroke();
+					ctx.restore();
+					ctx.closePath();
+
+					//to 1
+					ctx.beginPath();
+					ctx.save();
+					ctx.setLineDash([5, 3]);
+					ctx.strokeStyle = "#FB0808" ;
+					ctx.moveTo(x,y);
+					ctx.lineTo(x+70, y+ 150 - radius*2);
+					ctx.stroke();
+					ctx.restore();
+					ctx.closePath();
+
+					//to 4
+					ctx.beginPath();
+					ctx.save();
+					ctx.setLineDash([5, 3]);
+					ctx.strokeStyle = "#FB0808" ;
+					ctx.moveTo(x,y);
+					ctx.lineTo(x+ 70*4, y +150 - radius*2);
+					ctx.stroke();
+					ctx.restore();
+					ctx.closePath();
+
+				}else if(i === 1){//b
+					
+					//to 2
+					ctx.beginPath();
+					ctx.strokeStyle = matched; 
+					ctx.moveTo(x,y);
+					ctx.lineTo(x + 70,y + 150 - radius*2);
+					ctx.stroke();
+					ctx.closePath();
+
+				}else if(i === 2){//c
+					
+					//to 3
+					ctx.beginPath();
+					ctx.save();
+					ctx.strokeStyle = matched;
+					ctx.moveTo(x,y);
+					ctx.lineTo(x + 70,y + 150 - radius*2);
+					ctx.stroke();
+					ctx.restore();
+					ctx.closePath();
+
+				}else if(i === 3){//d
+					
+					//to 4
+					ctx.beginPath();
+					ctx.strokeStyle = "black";
+					ctx.moveTo(x,y);
+					ctx.lineTo(x + 70,y + 150 - radius*2);
+					ctx.stroke();
+					ctx.closePath();
+
+					//to 3
+					ctx.beginPath();
+					ctx.save();
+					ctx.setLineDash([5,3]);
+					ctx.strokeStyle = removed;
+					ctx.moveTo(x,y);
+					ctx.lineTo(x,y + 150 - radius*2);
+					ctx.stroke();
+					ctx.restore();
+					ctx.closePath();
+
+
+				}else{ //e
+
+					//to 0
+					ctx.beginPath();
+					ctx.save();
+					ctx.moveTo(x,y);
+					ctx.setLineDash([5, 3]);
+					ctx.strokeStyle = removed ;
+					ctx.lineTo(x - 70*4,y + 150 - radius*2);
+					ctx.stroke();
+					ctx.restore();
+					ctx.closePath();
+
+
+					//to 2
+					ctx.beginPath();
+					ctx.save();
+					ctx.moveTo(x,y);
+					ctx.setLineDash([5,3]);
+					ctx.strokeStyle = removed;
+					ctx.lineTo(x - 70*2,y + 150 - radius*2);
+					ctx.stroke();
+					ctx.restore();
+					ctx.closePath();
+
+					
+
+				}
+
+
+				x+=70;
+
+				}
+
+			
+
+				x = 410 ;//197.5
+				y =460;
+
+				letterX = x-9.5;
+				letterY = y+11;
+
+			ctx.beginPath();
+			ctx.fillStyle = "grey";
+			ctx.arc(x,y,radius,0,2*Math.PI);
+			ctx.fill();
+			ctx.closePath();
+
+			ctx.beginPath();
+			ctx.strokeStyle = "black";
+			ctx.arc(x,y,radius,0,2*Math.PI);
+			ctx.stroke();
+			ctx.closePath();
+
+	
+			ctx.font = "30px Arial"
+			ctx.fillStyle = "white";
+			ctx.fillText("A", letterX, letterY);
+
+			x += 150;
+			letterX = x -9.5;
+
+
+			ctx.beginPath();
+			ctx.fillStyle = "grey";
+			ctx.arc(x,y,radius,0,2*Math.PI);
+			ctx.fill();
+			ctx.closePath();
+
+			ctx.beginPath();
+			ctx.strokeStyle = "black";
+			ctx.arc(x,y,radius,0,2*Math.PI);
+			ctx.stroke();
+			ctx.closePath();
+
+
+			ctx.font = "30px Arial"
+			ctx.fillStyle = "white";
+			ctx.fillText("0", letterX, letterY);
+
+
+			x = 410;
+
+			ctx.beginPath();
+			ctx.strokeStyle = "#4C58FD"
+			ctx.moveTo(x+radius,y);
+			ctx.lineTo(x + 150-radius, y);
+			ctx.stroke();
+
+				x = 410 ;//197.5
+				y =515;
+
+				letterX = x-9.5;
+				letterY = y+11;
+
+			ctx.beginPath();
+			ctx.fillStyle = "grey";
+			ctx.arc(x,y,radius,0,2*Math.PI);
+			ctx.fill();
+			ctx.closePath();
+
+			ctx.beginPath();
+			ctx.strokeStyle = "black";
+			ctx.arc(x,y,radius,0,2*Math.PI);
+			ctx.stroke();
+			ctx.closePath();
+
+	  		//b
+			ctx.font = "30px Arial"
+			ctx.fillStyle = "white";
+			ctx.fillText("B", letterX, letterY);
+
+			x += 150;
+			letterX = x -9.5;
+
+
+			ctx.beginPath();
+			ctx.fillStyle = "grey";
+			ctx.arc(x,y,radius,0,2*Math.PI);
+			ctx.fill();
+			ctx.closePath();
+
+			ctx.beginPath();
+			ctx.strokeStyle = "black";
+			ctx.arc(x,y,radius,0,2*Math.PI);
+			ctx.stroke();
+			ctx.closePath();
+
+
+			ctx.font = "30px Arial"
+			ctx.fillStyle = "white";
+			ctx.fillText("2", letterX, letterY);
+
+
+			x = 410;
+
+			ctx.beginPath();
+			ctx.strokeStyle = "#4C58FD"
+			ctx.moveTo(x+radius,y);
+			ctx.lineTo(x + 150-radius, y);
+			ctx.stroke();
+
+
+			x = 410;
+
+			ctx.beginPath();
+			ctx.strokeStyle = "#4C58FD"
+			ctx.moveTo(x+radius,y);
+			ctx.lineTo(x + 150-radius, y);
+			ctx.stroke();
+
+				x = 410 ;//197.5
+				y =570;
+
+				letterX = x-9.5;
+				letterY = y+11;
+
+			ctx.beginPath();
+			ctx.fillStyle = "grey";
+			ctx.arc(x,y,radius,0,2*Math.PI);
+			ctx.fill();
+			ctx.closePath();
+
+			ctx.beginPath();
+			ctx.strokeStyle = "black";
+			ctx.arc(x,y,radius,0,2*Math.PI);
+			ctx.stroke();
+			ctx.closePath();
+
+
+			ctx.font = "30px Arial"
+			ctx.fillStyle = "white";
+			ctx.fillText("C", letterX, letterY);
+
+			x += 150;
+			letterX = x -9.5;
+
+
+			ctx.beginPath();
+			ctx.fillStyle = "grey";
+			ctx.arc(x,y,radius,0,2*Math.PI);
+			ctx.fill();
+			ctx.closePath();
+
+			ctx.beginPath();
+			ctx.strokeStyle = "black";
+			ctx.arc(x,y,radius,0,2*Math.PI);
+			ctx.stroke();
+			ctx.closePath();
+
+
+			ctx.font = "30px Arial"
+			ctx.fillStyle = "white";
+			ctx.fillText("3", letterX, letterY);
+
+
+			x = 410;
+
+			ctx.beginPath();
+			ctx.strokeStyle = "#4C58FD"
+			ctx.moveTo(x+radius,y);
+			ctx.lineTo(x + 150-radius, y);
+			ctx.stroke();
+
+	}
+
+	function bfsMatchedUnmatchedD1(){
+
+
+			ctx.clearRect(0,0,canvas.width,canvas.height);
+			x = 50 ;//197.5
+			y =160;
+			letterX = x-9.5;
+			letterY = y+11;
+			radius = 25;
+			tableX = 400;
+			tableY = 140;
+			ballColour = "black";
+			tableWidth = 250;
+			tableHeight = 400;
+
+			drawText();
+			drawDiagram(x);
+			drawEdges(x);
+			ctx.beginPath();
+			ctx.rect(320,70,315,50);
+			ctx.stroke();
+			ctx.closePath();
+
+			ctx.font = "30px Arial";
+			ctx.fillStyle = "black";
+			ctx.fillText("FIRST ITERATION", 347,110);
+
+
+
+
+
+			ballColour = "#EE8616";
+		
+
+			ctx.beginPath();
+			ctx.fillStyle = unmatched; 
+			ctx.rect(25,550,25,25);
+			ctx.fill();
+			ctx.closePath();
+
+			ctx.beginPath();
+			ctx.strokeStyle = "black"; 
+			ctx.rect(25,550,25,25);
+			ctx.stroke();
+			ctx.closePath();
+
+			ctx.font = "20px Arial";
+			ctx.fillStyle = "black";
+			ctx.fillText(" = UNMATCHED VERTICES", 50,570);
+
+
+			ctx.beginPath();
+			ctx.fillStyle = matched; 
+			ctx.rect(25,590,25,25);
+			ctx.fill();
+			ctx.closePath();
+
+			ctx.beginPath();
+			ctx.strokeStyle = "black"; 
+			ctx.rect(25,590,25,25);
+			ctx.stroke();
+			ctx.closePath();
+
+			ctx.font = "20px Arial";
+			ctx.fillStyle = "black";
+			ctx.fillText(" = MATCHING ", 50,610);
+
+			ctx.beginPath();
+			ctx.fillStyle = removed; 
+			ctx.rect(25,630,25,25);
+			ctx.fill();
+			ctx.closePath();
+
+			ctx.beginPath();
+			ctx.strokeStyle = "black"; 
+			ctx.rect(25,630,25,25);
+			ctx.stroke();
+			ctx.closePath();
+
+			ctx.font = "20px Arial";
+			ctx.fillStyle = "black";
+			ctx.fillText(" = REMOVED PATH ", 50,650);
+
+		
+
+			ctx.beginPath();
+			ctx.fillStyle = "black";
+			ctx.rect(360,370,250,50);
+			ctx.fill();
+			ctx.closePath();
+
+			ctx.font = "30px Arial";
+			ctx.fillStyle = "white";
+			ctx.fillText("M",470,405);
+
+
+				x = 335 ;//197.5
+				y =160;
+				letterX = x-9.5;
+				letterY = y+11;
+				radius = 20;
+
+
+				//set A
+				for(var i = 0; i<numLetters; i ++){
+
+
+					ctx.beginPath();
+					ctx.fillStyle = "grey";
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.fill();
+
+					ctx.beginPath();
+					ctx.strokeStyle = "black";
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.stroke();
+
+					ctx.fontStyle = "10px Arial";
+					ctx.fillStyle = "white";
+					ctx.fillText(letters.substring(i,i+1), letterX,letterY);
+
+
+					x+=70;
+					letterX = x-9.5;
+				}
+
+				//set B
+
+				x = 335;
+				y = 160 + 150;
+				letterY = y+11;
+				letterX = x-9.5;
+
+				for(var i = 0; i<numLetters; i ++){
+
+
+					ctx.beginPath();
+					ctx.fillStyle = ballColour;
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.fill();
+
+					ctx.beginPath();
+					ctx.strokeStyle = "black";
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.stroke();
+
+
+					ctx.fontStyle = "10px Arial";
+					ctx.fillStyle = "white";
+					ctx.fillText(i, letterX,letterY);
+
+
+					x+=70;
+					letterX = x-9.5;
+				}
+
+
+				 x = 335 ;//197.5
+				 y = 160 +radius;
+
+
+			for(var i = 0; i<numLetters; i++){
+
+
+				if(i === 0){ //a
+
+					ctx.beginPath();
+					ctx.save();
+					ctx.moveTo(x,y);
+					ctx.strokeStyle = "#4C58FD";
+					//to 0
+					ctx.lineTo(x,y + 150 - radius*2);
+					ctx.stroke();
+					ctx.restore();
+					ctx.closePath();
+
+					//to 1
+					ctx.beginPath();
+					ctx.save();
+					ctx.setLineDash([5, 3]);
+					ctx.strokeStyle = "#FB0808" ;
+					ctx.moveTo(x,y);
+					ctx.lineTo(x+70, y+ 150 - radius*2);
+					ctx.stroke();
+					ctx.restore();
+					ctx.closePath();
+
+					//to 4
+					ctx.beginPath();
+					ctx.save();
+					ctx.setLineDash([5, 3]);
+					ctx.strokeStyle = "#FB0808" ;
+					ctx.moveTo(x,y);
+					ctx.lineTo(x+ 70*4, y +150 - radius*2);
+					ctx.stroke();
+					ctx.restore();
+					ctx.closePath();
+
+				}else if(i === 1){//b
+					
+					//to 2
+					ctx.beginPath();
+					ctx.strokeStyle = matched; 
+					ctx.moveTo(x,y);
+					ctx.lineTo(x + 70,y + 150 - radius*2);
+					ctx.stroke();
+					ctx.closePath();
+
+				}else if(i === 2){//c
+					
+					//to 3
+					ctx.beginPath();
+					ctx.save();
+					ctx.strokeStyle = matched;
+					ctx.moveTo(x,y);
+					ctx.lineTo(x + 70,y + 150 - radius*2);
+					ctx.stroke();
+					ctx.restore();
+					ctx.closePath();
+
+				}else if(i === 3){//d
+					
+					//to 4
+					ctx.beginPath();
+					ctx.strokeStyle = matched;
+					ctx.moveTo(x,y);
+					ctx.lineTo(x + 70,y + 150 - radius*2);
+					ctx.stroke();
+					ctx.closePath();
+
+					//to 3
+					ctx.beginPath();
+					ctx.save();
+					ctx.setLineDash([5,3]);
+					ctx.strokeStyle = removed;
+					ctx.moveTo(x,y);
+					ctx.lineTo(x,y + 150 - radius*2);
+					ctx.stroke();
+					ctx.restore();
+					ctx.closePath();
+
+
+				}else{ //e
+
+					//to 0
+					ctx.beginPath();
+					ctx.save();
+					ctx.moveTo(x,y);
+					ctx.setLineDash([5, 3]);
+					ctx.strokeStyle = removed ;
+					ctx.lineTo(x - 70*4,y + 150 - radius*2);
+					ctx.stroke();
+					ctx.restore();
+					ctx.closePath();
+
+
+					//to 2
+					ctx.beginPath();
+					ctx.save();
+					ctx.moveTo(x,y);
+					ctx.setLineDash([5,3]);
+					ctx.strokeStyle = removed;
+					ctx.lineTo(x - 70*2,y + 150 - radius*2);
+					ctx.stroke();
+					ctx.restore();
+					ctx.closePath();
+
+					
+
+				}
+
+
+				x+=70;
+
+				}
+
+			
+
+				x = 410 ;//197.5
+				y =460;
+
+				letterX = x-9.5;
+				letterY = y+11;
+
+			ctx.beginPath();
+			ctx.fillStyle = "grey";
+			ctx.arc(x,y,radius,0,2*Math.PI);
+			ctx.fill();
+			ctx.closePath();
+
+			ctx.beginPath();
+			ctx.strokeStyle = "black";
+			ctx.arc(x,y,radius,0,2*Math.PI);
+			ctx.stroke();
+			ctx.closePath();
+
+
+			ctx.font = "30px Arial"
+			ctx.fillStyle = "white";
+			ctx.fillText("A", letterX, letterY);
+
+			x += 150;
+			letterX = x -9.5;
+
+
+			ctx.beginPath();
+			ctx.fillStyle = "grey";
+			ctx.arc(x,y,radius,0,2*Math.PI);
+			ctx.fill();
+			ctx.closePath();
+
+			ctx.beginPath();
+			ctx.strokeStyle = "black";
+			ctx.arc(x,y,radius,0,2*Math.PI);
+			ctx.stroke();
+			ctx.closePath();
+
+
+			ctx.font = "30px Arial"
+			ctx.fillStyle = "white";
+			ctx.fillText("0", letterX, letterY);
+
+
+			x = 410;
+
+			ctx.beginPath();
+			ctx.strokeStyle = "#4C58FD"
+			ctx.moveTo(x+radius,y);
+			ctx.lineTo(x + 150-radius, y);
+			ctx.stroke();
+
+				x = 410 ;//197.5
+				y =515;
+
+				letterX = x-9.5;
+				letterY = y+11;
+
+			ctx.beginPath();
+			ctx.fillStyle = "grey";
+			ctx.arc(x,y,radius,0,2*Math.PI);
+			ctx.fill();
+			ctx.closePath();
+
+			ctx.beginPath();
+			ctx.strokeStyle = "black";
+			ctx.arc(x,y,radius,0,2*Math.PI);
+			ctx.stroke();
+			ctx.closePath();
+
+
+			ctx.font = "30px Arial"
+			ctx.fillStyle = "white";
+			ctx.fillText("B", letterX, letterY);
+
+			x += 150;
+			letterX = x -9.5;
+
+
+			ctx.beginPath();
+			ctx.fillStyle = "grey";
+			ctx.arc(x,y,radius,0,2*Math.PI);
+			ctx.fill();
+			ctx.closePath();
+
+			ctx.beginPath();
+			ctx.strokeStyle = "black";
+			ctx.arc(x,y,radius,0,2*Math.PI);
+			ctx.stroke();
+			ctx.closePath();
+
+
+			ctx.font = "30px Arial"
+			ctx.fillStyle = "white";
+			ctx.fillText("2", letterX, letterY);
+
+
+			x = 410;
+
+			ctx.beginPath();
+			ctx.strokeStyle = "#4C58FD"
+			ctx.moveTo(x+radius,y);
+			ctx.lineTo(x + 150-radius, y);
+			ctx.stroke();
+
+
+			x = 410;
+
+			ctx.beginPath();
+			ctx.strokeStyle = "#4C58FD"
+			ctx.moveTo(x+radius,y);
+			ctx.lineTo(x + 150-radius, y);
+			ctx.stroke();
+
+				x = 410 ;//197.5
+				y =570;
+
+				letterX = x-9.5;
+				letterY = y+11;
+
+			ctx.beginPath();
+			ctx.fillStyle = "grey";
+			ctx.arc(x,y,radius,0,2*Math.PI);
+			ctx.fill();
+			ctx.closePath();
+
+			ctx.beginPath();
+			ctx.strokeStyle = "black";
+			ctx.arc(x,y,radius,0,2*Math.PI);
+			ctx.stroke();
+			ctx.closePath();
+
+
+			ctx.font = "30px Arial"
+			ctx.fillStyle = "white";
+			ctx.fillText("C", letterX, letterY);
+
+			x += 150;
+			letterX = x -9.5;
+
+
+			ctx.beginPath();
+			ctx.fillStyle = "grey";
+			ctx.arc(x,y,radius,0,2*Math.PI);
+			ctx.fill();
+			ctx.closePath();
+
+			ctx.beginPath();
+			ctx.strokeStyle = "black";
+			ctx.arc(x,y,radius,0,2*Math.PI);
+			ctx.stroke();
+			ctx.closePath();
+
+
+			ctx.font = "30px Arial"
+			ctx.fillStyle = "white";
+			ctx.fillText("3", letterX, letterY);
+
+
+			x = 410;
+
+			ctx.beginPath();
+			ctx.strokeStyle = "#4C58FD"
+			ctx.moveTo(x+radius,y);
+			ctx.lineTo(x + 150-radius, y);
+			ctx.stroke();
+
+
+				x = 410 ;//197.5
+				y =625;
+
+				letterX = x-9.5;
+				letterY = y+11;
+
+			ctx.beginPath();
+			ctx.fillStyle = "grey";
+			ctx.arc(x,y,radius,0,2*Math.PI);
+			ctx.fill();
+			ctx.closePath();
+
+			ctx.beginPath();
+			ctx.strokeStyle = "black";
+			ctx.arc(x,y,radius,0,2*Math.PI);
+			ctx.stroke();
+			ctx.closePath();
+
+
+			ctx.font = "30px Arial"
+			ctx.fillStyle = "white";
+			ctx.fillText("D", letterX, letterY);
+
+			x += 150;
+			letterX = x -9.5;
+
+
+			ctx.beginPath();
+			ctx.fillStyle = "grey";
+			ctx.arc(x,y,radius,0,2*Math.PI);
+			ctx.fill();
+			ctx.closePath();
+
+			ctx.beginPath();
+			ctx.strokeStyle = "black";
+			ctx.arc(x,y,radius,0,2*Math.PI);
+			ctx.stroke();
+			ctx.closePath();
+
+
+			ctx.font = "30px Arial"
+			ctx.fillStyle = "white";
+			ctx.fillText("4", letterX, letterY);
+
+
+			x = 410;
+
+			ctx.beginPath();
+			ctx.strokeStyle = "#4C58FD"
+			ctx.moveTo(x+radius,y);
+			ctx.lineTo(x + 150-radius, y);
+			ctx.stroke();
+
+
+
+	}
+
+
+	function stepFour(){
+
+
+			ctx.clearRect(0,0,canvas.width,canvas.height);
+			x = 50 ;//197.5
+			y =160;
+			letterX = x-9.5;
+			letterY = y+11;
+			radius = 25;
+			tableX = 400;
+			tableY = 140;
+			ballColour = "black";
+
+			tableWidth = 250;
+			tableHeight = 400;;
+
+			drawText();
+			drawDiagram(x);
+			//drawEdges(x);
+			drawEdgesWithMatchings1(x);
+
+
+
+			ctx.beginPath();
+			ctx.fillStyle = "black";
+			ctx.rect(360,75,250,50);
+			ctx.fill();
+			ctx.closePath();
+
+			ctx.font = "30px Arial";
+			ctx.fillStyle = "white";
+			ctx.fillText("M",470,110);
+
+			
+			
+
+				x = 410 ;//197.5
+				y =170;
+
+				letterX = x-9.5;
+				letterY = y+11;
+
+			ctx.beginPath();
+			ctx.fillStyle = "grey";
+			ctx.arc(x,y,radius,0,2*Math.PI);
+			ctx.fill();
+			ctx.closePath();
+
+			ctx.beginPath();
+			ctx.strokeStyle = "black";
+			ctx.arc(x,y,radius,0,2*Math.PI);
+			ctx.stroke();
+			ctx.closePath();
+
+
+			ctx.font = "30px Arial"
+			ctx.fillStyle = "white";
+			ctx.fillText("A", letterX, letterY);
+
+			x += 150;
+			letterX = x -9.5;
+
+
+			ctx.beginPath();
+			ctx.fillStyle = "grey";
+			ctx.arc(x,y,radius,0,2*Math.PI);
+			ctx.fill();
+			ctx.closePath();
+
+			ctx.beginPath();
+			ctx.strokeStyle = "black";
+			ctx.arc(x,y,radius,0,2*Math.PI);
+			ctx.stroke();
+			ctx.closePath();
+
+
+			ctx.font = "30px Arial"
+			ctx.fillStyle = "white";
+			ctx.fillText("0", letterX, letterY);
+
+
+			x = 410;
+
+			ctx.beginPath();
+			ctx.strokeStyle = "#4C58FD"
+			ctx.moveTo(x+radius,y);
+			ctx.lineTo(x + 150-radius, y);
+			ctx.stroke();
+
+				x = 410 ;//197.5
+				y =170+60	;
+
+				letterX = x-9.5;
+				letterY = y+11;
+
+			ctx.beginPath();
+			ctx.fillStyle = "grey";
+			ctx.arc(x,y,radius,0,2*Math.PI);
+			ctx.fill();
+			ctx.closePath();
+
+			ctx.beginPath();
+			ctx.strokeStyle = "black";
+			ctx.arc(x,y,radius,0,2*Math.PI);
+			ctx.stroke();
+			ctx.closePath();
+
+
+			ctx.font = "30px Arial"
+			ctx.fillStyle = "white";
+			ctx.fillText("B", letterX, letterY);
+
+			x += 150;
+			letterX = x -9.5;
+
+
+			ctx.beginPath();
+			ctx.fillStyle = "grey";
+			ctx.arc(x,y,radius,0,2*Math.PI);
+			ctx.fill();
+			ctx.closePath();
+
+			ctx.beginPath();
+			ctx.strokeStyle = "black";
+			ctx.arc(x,y,radius,0,2*Math.PI);
+			ctx.stroke();
+			ctx.closePath();
+
+
+			ctx.font = "30px Arial"
+			ctx.fillStyle = "white";
+			ctx.fillText("2", letterX, letterY);
+
+
+			x = 410;
+
+			ctx.beginPath();
+			ctx.strokeStyle = "#4C58FD"
+			ctx.moveTo(x+radius,y);
+			ctx.lineTo(x + 150-radius, y);
+			ctx.stroke();
+
+
+			x = 410;
+
+			ctx.beginPath();
+			ctx.strokeStyle = "#4C58FD"
+			ctx.moveTo(x+radius,y);
+			ctx.lineTo(x + 150-radius, y);
+			ctx.stroke();
+
+				x = 410 ;//197.5
+				y =170+60*2;
+
+				letterX = x-9.5;
+				letterY = y+11;
+
+			ctx.beginPath();
+			ctx.fillStyle = "grey";
+			ctx.arc(x,y,radius,0,2*Math.PI);
+			ctx.fill();
+			ctx.closePath();
+
+			ctx.beginPath();
+			ctx.strokeStyle = "black";
+			ctx.arc(x,y,radius,0,2*Math.PI);
+			ctx.stroke();
+			ctx.closePath();
+
+
+			ctx.font = "30px Arial"
+			ctx.fillStyle = "white";
+			ctx.fillText("C", letterX, letterY);
+
+			x += 150;
+			letterX = x -9.5;
+
+
+			ctx.beginPath();
+			ctx.fillStyle = "grey";
+			ctx.arc(x,y,radius,0,2*Math.PI);
+			ctx.fill();
+			ctx.closePath();
+
+			ctx.beginPath();
+			ctx.strokeStyle = "black";
+			ctx.arc(x,y,radius,0,2*Math.PI);
+			ctx.stroke();
+			ctx.closePath();
+
+
+			ctx.font = "30px Arial"
+			ctx.fillStyle = "white";
+			ctx.fillText("3", letterX, letterY);
+
+
+			x = 410;
+
+			ctx.beginPath();
+			ctx.strokeStyle = "#4C58FD"
+			ctx.moveTo(x+radius,y);
+			ctx.lineTo(x + 150-radius, y);
+			ctx.stroke();
+
+
+				x = 410 ;//197.5
+				y =170+60*3;
+
+				letterX = x-9.5;
+				letterY = y+11;
+
+			ctx.beginPath();
+			ctx.fillStyle = "grey";
+			ctx.arc(x,y,radius,0,2*Math.PI);
+			ctx.fill();
+			ctx.closePath();
+
+			ctx.beginPath();
+			ctx.strokeStyle = "black";
+			ctx.arc(x,y,radius,0,2*Math.PI);
+			ctx.stroke();
+			ctx.closePath();
+
+
+			ctx.font = "30px Arial"
+			ctx.fillStyle = "white";
+			ctx.fillText("D", letterX, letterY);
+
+			x += 150;
+			letterX = x -9.5;
+
+
+			ctx.beginPath();
+			ctx.fillStyle = "grey";
+			ctx.arc(x,y,radius,0,2*Math.PI);
+			ctx.fill();
+			ctx.closePath();
+
+			ctx.beginPath();
+			ctx.strokeStyle = "black";
+			ctx.arc(x,y,radius,0,2*Math.PI);
+			ctx.stroke();
+			ctx.closePath();
+
+
+			ctx.font = "30px Arial"
+			ctx.fillStyle = "white";
+			ctx.fillText("4", letterX, letterY);
+
+
+			x = 410;
+
+			ctx.beginPath();
+			ctx.strokeStyle = "#4C58FD"
+			ctx.moveTo(x+radius,y);
+			ctx.lineTo(x + 150-radius, y);
+			ctx.stroke();
+
+
+
+	}
+
+	function drawEdgesWithMatchings1(startX){
+				
+			 x = startX + radius ;//197.5
+			 y = 160  ; 
+			 for(var i = 0; i<numLetters; i++){
+
+
+					if(i === 0){ //a
+
+
+					//to 0
+					ctx.beginPath();
+					ctx.strokeStyle = matched;
+					ctx.moveTo(x,y);
+				
+					ctx.lineTo(x+175 - radius,y);
+					ctx.stroke();
+					ctx.closePath();
+
+					//to 1
+					ctx.beginPath();
+					ctx.strokeStyle = "black";
+					ctx.moveTo(x,y);
+					ctx.lineTo(x+175  - radius, y+80);
+					ctx.stroke();
+					ctx.closePath();
+
+					//to 4
+					ctx.moveTo(x,y);
+					ctx.lineTo(x+175 - radius, y + (80*4));
+					ctx.stroke();
+
+
+					ctx.closePath();
+
+				}else if(i === 1){//b
+					
+					//to 2
+					ctx.beginPath();
+					ctx.strokeStyle = matched;
+					ctx.moveTo(x,y);
+					ctx.lineTo(x+175 -radius, y+80);
+					ctx.stroke();
+
+					ctx.closePath();
+
+				}else if(i === 2){//c
+					
+					//to 3
+					ctx.beginPath();
+					ctx.moveTo(x,y);
+					ctx.lineTo(x+175 -radius, y+80);
+					ctx.stroke();
+
+					ctx.closePath();
+
+				}else if(i === 3){//d
+					
+					//to 4
+					ctx.beginPath();
+					ctx.moveTo(x,y);
+					ctx.lineTo(x+175 -radius, y+80);
+					ctx.stroke();
+					ctx.closePath();
+
+					//to 3
+					ctx.beginPath();
+					ctx.moveTo(x,y);
+					ctx.strokeStyle = "black";
+					ctx.lineTo(x+175 -radius, y);
+					ctx.stroke();
+
+					ctx.closePath();
+
+				}else{ //e
+
+					//to 0
+					ctx.beginPath();
+					ctx.moveTo(x,y);
+					ctx.lineTo(x+175 -radius, y - (80*4));
+					ctx.stroke();
+
+					//to 2
+					ctx.moveTo(x,y);
+					ctx.lineTo(x+175 -radius, y - (80*2));
+					ctx.stroke();
+
+
+
+
+					ctx.closePath();
+
+					
+
+				}
+
+
+				y+=80;
+			
+				}
+	}
+
+	function stepFive(){
+			ctx.clearRect(0,0,canvas.width,canvas.height);
+			x = 50 ;//197.5
+			y =160;
+			letterX = x-9.5;
+			letterY = y+11;
+			radius = 25;
+			tableX = 400;
+			tableY = 140;
+			ballColour = "black";
+
+			tableWidth = 250;
+			tableHeight = 400;;
+
+
+			
+			drawText();
+			drawDiagram2(x);
+			drawEdgesWithMatchings1(x);
+
+					//text
+					ctx.beginPath();
+					ctx.fillStyle = matched; 
+					ctx.rect(25,540,25,25);
+					ctx.fill();
+					ctx.closePath();
+
+					ctx.beginPath();
+					ctx.strokeStyle = "black"; 
+					ctx.rect(25,540,25,25);
+					ctx.stroke();
+					ctx.closePath();
+
+					ctx.font = "20px Arial";
+					ctx.fillStyle = "black";
+					ctx.fillText(" = MATCHING ", 50,560);
+
+					ctx.beginPath();
+					ctx.fillStyle = unmatched; 
+					ctx.rect(25,580,25,25);
+					ctx.fill();
+					ctx.closePath();
+
+					ctx.beginPath();
+					ctx.strokeStyle = "black"; 
+					ctx.rect(25,580,25,25);
+					ctx.stroke();
+					ctx.closePath();
+
+					ctx.font = "20px Arial";
+					ctx.fillStyle = "black";
+					ctx.fillText(" = UNMATCHED VERTICES", 50,600);
+
+					ctx.beginPath();
+					ctx.fillStyle = "black"; 
+					ctx.rect(25,620,25,25);
+					ctx.fill();
+					ctx.closePath();
+
+					ctx.beginPath();
+					ctx.strokeStyle = "black"; 
+					ctx.rect(25,620,25,25);
+					ctx.stroke();
+					ctx.closePath();
+
+					ctx.font = "20px Arial";
+					ctx.fillStyle = "black";
+					ctx.fillText(" = UNMATCHED EDGES", 50,640);
+
+
+
+			setTimeout(depth1,1000);
+			setTimeout(depth2,2000);
+			setTimeout(depth3,3000);
+	}
+
+
+	function drawDiagram2(setAX){
+
+		letterX = setAX-9.5;
+
+		ctx.font = "20px Arial";
+		ctx.fillStyle = "black";
+		ctx.fillText("SET A", setAX - 30,y-50);
+	
+
+		//set a 
+		
+		for(var i = 0; i <numLetters; i++ ){
+
+			if(i === numLetters-1){
+				ballColour = unmatched;
+
+				
+			}
+
+			ctx.beginPath();
+			ctx.arc(x,y,radius,0,Math.PI*2);
+			ctx.strokeStyle = "black";
+			ctx.stroke();
+			ctx.closePath();
+
+			ctx.beginPath();
+			ctx.arc(x,y,radius,0,Math.PI*2);
+			ctx.fillStyle = ballColour;
+			ctx.fill();
+			ctx.closePath();
+			
+			ctx.font = "30px Arial";
+			ctx.fillStyle = "white";
+			ctx.fillText(letters.substring(i,i+1),letterX,letterY);
+			ballColour = "black";
+
+			letterY +=80;
+			y+=80;
+		}
+
+	
+		setBX = setAX + 200;
+		letterX = setBX-9.5;
+		y = 160;
+		letterY = y+11;
+
+		ctx.font = "20px Arial";
+		ctx.fillStyle = "black";
+		ctx.fillText("SET B", setBX - 30, y - 50);
+
+		for(var i = 0; i <numLetters; i++ ){
+
+				if(i === 1){
+					ballColour = unmatched;
+				}
+				ctx.beginPath();
+				ctx.fillStyle = ballColour;
+				ctx.arc(setBX,y,radius,0,Math.PI*2);
+				ctx.fill();
+				ctx.closePath();
+
+				ctx.beginPath();
+				ctx.arc(setBX,y,radius,0,Math.PI*2);
+				ctx.strokeStyle = "black";
+				ctx.stroke();
+				ctx.closePath();
+				
+				ctx.font = "30px Arial";
+				ctx.fillStyle = "white";
+				ctx.fillText(i,letterX,letterY);
+
+				ballColour = "black";
+
+
+				letterY +=80;
+				y+=80;
+			}
+
+	}
+
+
+	function depth1(){
+
+		x = 485;
+		y = 130;
+
+		ctx.beginPath();
+		ctx.fillStyle = unmatched;
+		ctx.arc(x,y,radius,0,2*Math.PI);
+		ctx.fill();
+		ctx.closePath();
+
+		ctx.beginPath();
+		ctx.strokeStyle = "black";
+		ctx.arc(x,y,radius,0,2*Math.PI);
+		ctx.stroke();
+		ctx.closePath();
+
+		ctx.font = "30px Arial";
+		ctx.fillStyle = "white";
+		ctx.fillText("E", x-10,y+10);
+
+
+		ctx.beginPath();
+		ctx.strokeStyle = "black";
+		ctx.moveTo(x,y+radius);
+		ctx.lineTo(x,y+radius+30);
+		ctx.stroke();
+		ctx.closePath();
+
+		ctx.beginPath();
+		ctx.fillStyle = "black";
+		ctx.arc(x,y+radius+50,radius,0,2*Math.PI);
+		ctx.fill();
+		ctx.closePath();
+
+		ctx.beginPath();
+		ctx.strokeStyle = "black";
+		ctx.arc(x,y+radius+50,radius,0,2*Math.PI);
+		ctx.stroke();
+		ctx.closePath();
+
+		ctx.font = "30px Arial";
+		ctx.fillStyle = "white";
+		ctx.fillText("0", x-8,y+85);
+
+	}
+
+	function depth2(){
+		x = 485;
+		y = 130;
+
+		ctx.beginPath();
+		ctx.fillStyle = unmatched;
+		ctx.arc(x,y,radius,0,2*Math.PI);
+		ctx.fill();
+		ctx.closePath();
+
+		ctx.beginPath();
+		ctx.strokeStyle = "black";
+		ctx.arc(x,y,radius,0,2*Math.PI);
+		ctx.stroke();
+		ctx.closePath();
+
+		ctx.font = "30px Arial";
+		ctx.fillStyle = "white";
+		ctx.fillText("E", x-10,y+10);
+
+
+		y =  y+radius;
+
+		ctx.beginPath();
+		ctx.strokeStyle = "black";
+		ctx.moveTo(x,y);
+		ctx.lineTo(x,y+30);
+		ctx.stroke();
+		ctx.closePath();
+
+		ctx.beginPath();
+		ctx.fillStyle = "black";
+		ctx.arc(x,y+50,radius,0,2*Math.PI);
+		ctx.fill();
+		ctx.closePath();
+
+		ctx.beginPath();
+		ctx.strokeStyle = "black";
+		ctx.arc(x,y+50,radius,0,2*Math.PI);
+		ctx.stroke();
+		ctx.closePath();
+
+		ctx.font = "30px Arial";
+		ctx.fillStyle = "white";
+		ctx.fillText("0", x-8,y+60);
+
+		y =  y+radius*3;
+
+		ctx.beginPath();
+		ctx.strokeStyle = matched;
+		ctx.moveTo(x,y);
+		ctx.lineTo(x,y+30);
+		ctx.stroke();
+		ctx.closePath();
+
+
+		ctx.beginPath();
+		ctx.fillStyle = "black";
+		ctx.arc(x,y+55,radius,0,2*Math.PI);
+		ctx.fill();
+		ctx.closePath();		
+
+		ctx.font = "30px Arial";
+		ctx.fillStyle = "white";
+		ctx.fillText("A", x-10,y+65);
+
+	}
+
+	function depth3(){
+		x = 485;
+		y = 130;
+
+		ctx.beginPath();
+		ctx.fillStyle = unmatched;
+		ctx.arc(x,y,radius,0,2*Math.PI);
+		ctx.fill();
+		ctx.closePath();
+
+		ctx.beginPath();
+		ctx.strokeStyle = "black";
+		ctx.arc(x,y,radius,0,2*Math.PI);
+		ctx.stroke();
+		ctx.closePath();
+
+		ctx.font = "30px Arial";
+		ctx.fillStyle = "white";
+		ctx.fillText("E", x-10,y+10);
+
+
+		y =  y+radius;
+
+		ctx.beginPath();
+		ctx.strokeStyle = "black";
+		ctx.moveTo(x,y);
+		ctx.lineTo(x,y+30);
+		ctx.stroke();
+		ctx.closePath();
+
+		ctx.beginPath();
+		ctx.fillStyle = "black";
+		ctx.arc(x,y+50,radius,0,2*Math.PI);
+		ctx.fill();
+		ctx.closePath();
+
+		ctx.beginPath();
+		ctx.strokeStyle = "black";
+		ctx.arc(x,y+50,radius,0,2*Math.PI);
+		ctx.stroke();
+		ctx.closePath();
+
+		ctx.font = "30px Arial";
+		ctx.fillStyle = "white";
+		ctx.fillText("0", x-8,y+60);
+
+		y =  y+radius*3;
+
+		ctx.beginPath();
+		ctx.strokeStyle = matched;
+		ctx.moveTo(x,y);
+		ctx.lineTo(x,y+30);
+		ctx.stroke();
+		ctx.closePath();
+
+
+		ctx.beginPath();
+		ctx.fillStyle = "black";
+		ctx.arc(x,y+55,radius,0,2*Math.PI);
+		ctx.fill();
+		ctx.closePath();		
+
+		ctx.font = "30px Arial";
+		ctx.fillStyle = "white";
+		ctx.fillText("A", x-10,y+65);
+
+		y =  y+radius*3;
+
+		ctx.beginPath();
+		ctx.strokeStyle = "black";
+		ctx.moveTo(x,y);
+		ctx.lineTo(x,y+40);
+		ctx.stroke();
+		ctx.closePath();
+
+		ctx.beginPath();
+		ctx.fillStyle = unmatched;
+		ctx.arc(x,y+60,radius,0,2*Math.PI);
+		ctx.fill();
+		ctx.closePath();
+
+		ctx.beginPath();
+		ctx.strokeStyle = "black";
+		ctx.arc(x,y+60,radius,0,2*Math.PI);
+		ctx.stroke();
+		ctx.closePath();
+
+		ctx.font = "30px Arial";
+		ctx.fillStyle = "white";
+		ctx.fillText("1", x-10,y+70);
+
+	}
+
+	function stepSix(){
+
+		ctx.clearRect(0,0,canvas.width,canvas.height);
+			x = 50 ;//197.5
+			y =160;
+			letterX = x-9.5;
+			letterY = y+11;
+			radius = 25;
+			tableX = 400;
+			tableY = 140;
+			ballColour = "black";
+
+			tableWidth = 250;
+			tableHeight = 400;;
+
+
+			
+			drawText();
+			drawDiagram2(x);
+			drawEdgesWithMatchings1(x);
+
+					//text
+					ctx.beginPath();
+					ctx.fillStyle = matched; 
+					ctx.rect(25,540,25,25);
+					ctx.fill();
+					ctx.closePath();
+
+					ctx.beginPath();
+					ctx.strokeStyle = "black"; 
+					ctx.rect(25,540,25,25);
+					ctx.stroke();
+					ctx.closePath();
+
+					ctx.font = "20px Arial";
+					ctx.fillStyle = "black";
+					ctx.fillText(" = MATCHING ", 50,560);
+
+					ctx.beginPath();
+					ctx.fillStyle = unmatched; 
+					ctx.rect(25,580,25,25);
+					ctx.fill();
+					ctx.closePath();
+
+					ctx.beginPath();
+					ctx.strokeStyle = "black"; 
+					ctx.rect(25,580,25,25);
+					ctx.stroke();
+					ctx.closePath();
+
+					ctx.font = "20px Arial";
+					ctx.fillStyle = "black";
+					ctx.fillText(" = UNMATCHED VERTICES", 50,600);
+
+					ctx.beginPath();
+					ctx.fillStyle = "black"; 
+					ctx.rect(25,620,25,25);
+					ctx.fill();
+					ctx.closePath();
+
+					ctx.beginPath();
+					ctx.strokeStyle = "black"; 
+					ctx.rect(25,620,25,25);
+					ctx.stroke();
+					ctx.closePath();
+
+					ctx.font = "20px Arial";
+					ctx.fillStyle = "black";
+					ctx.fillText(" = UNMATCHED EDGES", 50,640);
+
+
+					ctx.beginPath();
+					ctx.fillStyle = removed; 
+					ctx.rect(25,660,25,25);
+					ctx.fill();
+					ctx.closePath();
+
+					ctx.beginPath();
+					ctx.strokeStyle = "black"; 
+					ctx.rect(25,660,25,25);
+					ctx.stroke();
+					ctx.closePath();
+
+					ctx.font = "20px Arial";
+					ctx.fillStyle = "black";
+					ctx.fillText(" = REMOVED MATCHING", 50,680);
+
+
+				augmentingPath();
+				matchings2();
+
+				setTimeout(removeMatching,1000);
+				setTimeout(addMatching1,2000);
+				setTimeout(addMatching2,3000);
+				setTimeout(addMatching3,4000);
+
+				setTimeout(addMatchings,5000);
+			
+
+	}
+
+
+	function drawEdgesWithMatchings2(startX){
+
+
+			 x = startX + radius ;//197.5
+			 y = 160  ; 
+			 for(var i = 0; i<numLetters; i++){
+
+
+					if(i === 0){ //a
+
+
+					//to 0
+					ctx.beginPath();
+					ctx.strokeStyle = "black";
+					ctx.moveTo(x,y);
+				
+					ctx.lineTo(x+175 - radius,y);
+					ctx.stroke();
+					ctx.closePath();
+
+					//to 1
+					ctx.beginPath();
+					ctx.strokeStyle = matched;
+					ctx.moveTo(x,y);
+					ctx.lineTo(x+175  - radius, y+80);
+					ctx.stroke();
+					ctx.closePath();
+
+					//to 4
+					ctx.moveTo(x,y);
+					ctx.lineTo(x+175 - radius, y + (80*4));
+					ctx.stroke();
+
+
+					ctx.closePath();
+
+				}else if(i === 1){//b
+					
+					//to 2
+					ctx.beginPath();
+					ctx.strokeStyle = matched;
+					ctx.moveTo(x,y);
+					ctx.lineTo(x+175 -radius, y+80);
+					ctx.stroke();
+
+					ctx.closePath();
+
+				}else if(i === 2){//c
+					
+					//to 3
+					ctx.beginPath();
+					ctx.moveTo(x,y);
+					ctx.lineTo(x+175 -radius, y+80);
+					ctx.stroke();
+
+					ctx.closePath();
+
+				}else if(i === 3){//d
+					
+					//to 4
+					ctx.beginPath();
+					ctx.moveTo(x,y);
+					ctx.lineTo(x+175 -radius, y+80);
+					ctx.stroke();
+					ctx.closePath();
+
+					//to 3
+					ctx.beginPath();
+					ctx.moveTo(x,y);
+					ctx.strokeStyle = "black";
+					ctx.lineTo(x+175 -radius, y);
+					ctx.stroke();
+
+					ctx.closePath();
+
+				}else{ //e
+
+					//to 0
+					ctx.beginPath();
+					ctx.strokeStyle = matched;
+					ctx.moveTo(x,y);
+					ctx.lineTo(x+175 -radius, y - (80*4));
+					ctx.stroke();
+					ctx.closePath();
+
+					//to 2
+					ctx.beginPath()
+					ctx.strokeStyle = "black";
+					ctx.moveTo(x,y);
+					ctx.lineTo(x+175 -radius, y - (80*2));
+					ctx.stroke();
+					ctx.closePath();
+
+					
+
+				}
+
+
+				y+=80;
+			
+				}
+	}
+
+
+
+	function addMatchings(){
+
+		ctx.clearRect(0,0,canvas.width,canvas.height);
+			x = 50 ;//197.5
+			y =160;
+			letterX = x-9.5;
+			letterY = y+11;
+			radius = 25;
+			tableX = 400;
+			tableY = 140;
+			ballColour = "black";
+
+			tableWidth = 250;
+			tableHeight = 400;;
+
+
+			
+			drawText();
+			drawDiagram2(x);
+			
+			drawEdgesWithMatchings2(x);
+
+					//text
+					ctx.beginPath();
+					ctx.fillStyle = matched; 
+					ctx.rect(25,540,25,25);
+					ctx.fill();
+					ctx.closePath();
+
+					ctx.beginPath();
+					ctx.strokeStyle = "black"; 
+					ctx.rect(25,540,25,25);
+					ctx.stroke();
+					ctx.closePath();
+
+					ctx.font = "20px Arial";
+					ctx.fillStyle = "black";
+					ctx.fillText(" = MATCHING ", 50,560);
+
+					ctx.beginPath();
+					ctx.fillStyle = unmatched; 
+					ctx.rect(25,580,25,25);
+					ctx.fill();
+					ctx.closePath();
+
+					ctx.beginPath();
+					ctx.strokeStyle = "black"; 
+					ctx.rect(25,580,25,25);
+					ctx.stroke();
+					ctx.closePath();
+
+					ctx.font = "20px Arial";
+					ctx.fillStyle = "black";
+					ctx.fillText(" = UNMATCHED VERTICES", 50,600);
+
+					ctx.beginPath();
+					ctx.fillStyle = "black"; 
+					ctx.rect(25,620,25,25);
+					ctx.fill();
+					ctx.closePath();
+
+					ctx.beginPath();
+					ctx.strokeStyle = "black"; 
+					ctx.rect(25,620,25,25);
+					ctx.stroke();
+					ctx.closePath();
+
+					ctx.font = "20px Arial";
+					ctx.fillStyle = "black";
+					ctx.fillText(" = UNMATCHED EDGES", 50,640);
+
+
+					ctx.beginPath();
+					ctx.fillStyle = removed; 
+					ctx.rect(25,660,25,25);
+					ctx.fill();
+					ctx.closePath();
+
+					ctx.beginPath();
+					ctx.strokeStyle = "black"; 
+					ctx.rect(25,660,25,25);
+					ctx.stroke();
+					ctx.closePath();
+
+					ctx.font = "20px Arial";
+					ctx.fillStyle = "black";
+					ctx.fillText(" = REMOVED MATCHING", 50,680);
+
+
+
+		ctx.beginPath();
+					
+
+					ctx.fillStyle = "black";
+					ctx.rect(425,65,215,50);
+					ctx.fill();
+					ctx.closePath();
+
+					ctx.font = "30px Arial";
+					ctx.fillStyle = "white";
+					ctx.fillText("M",520,100);
+
+
+						x = 460 ;//197.5
+						y =150;
+
+						letterX = x-9.5;
+						letterY = y+11;
+
+					ctx.beginPath();
+					ctx.fillStyle = "grey";
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.fill();
+					ctx.closePath();
+
+					ctx.beginPath();
+					ctx.save();
+					ctx.setLineDash([5,3]);
+					ctx.strokeStyle = removed;
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.stroke();
+					ctx.restore();
+					ctx.closePath();
+
+
+					ctx.font = "30px Arial"
+					ctx.fillStyle = "white";
+					ctx.fillText("A", letterX, letterY);
+
+					x += 150;
+					letterX = x -9.5;
+
+
+					ctx.beginPath();
+					ctx.fillStyle = "grey";
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.fill();
+					ctx.closePath();
+
+					ctx.beginPath();
+					ctx.save();
+					ctx.setLineDash([5,3]);	
+					ctx.strokeStyle = removed;
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.stroke();
+					ctx.restore();
+					ctx.closePath();
+
+
+					ctx.font = "30px Arial"
+					ctx.fillStyle = "white";
+					ctx.fillText("0", letterX, letterY);
+
+
+					x = 460;
+
+					ctx.beginPath();
+					ctx.strokeStyle = "#4C58FD";
+					ctx.moveTo(x+radius,y);
+					ctx.lineTo(x + 150-radius, y);
+					ctx.stroke();
+
+						x = 460 ;//197.5
+						y +=65;
+
+						letterX = x-9.5;
+						letterY = y+11;
+
+					ctx.beginPath();
+					ctx.fillStyle = "grey";
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.fill();
+					ctx.closePath();
+
+					ctx.beginPath();
+					ctx.strokeStyle = "black";
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.stroke();
+					ctx.closePath();
+
+
+					ctx.font = "30px Arial"
+					ctx.fillStyle = "white";
+					ctx.fillText("B", letterX, letterY);
+
+					x += 150;
+					letterX = x -9.5;
+
+
+					ctx.beginPath();
+					ctx.fillStyle = "grey";
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.fill();
+					ctx.closePath();
+
+					ctx.beginPath();
+					ctx.strokeStyle = "black";
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.stroke();
+					ctx.closePath();
+
+
+					ctx.font = "30px Arial"
+					ctx.fillStyle = "white";
+					ctx.fillText("2", letterX, letterY);
+
+
+					x = 460;
+
+					ctx.beginPath();
+					ctx.strokeStyle = "#4C58FD"
+					ctx.moveTo(x+radius,y);
+					ctx.lineTo(x + 150-radius, y);
+					ctx.stroke();
+
+
+					x = 460;
+
+					ctx.beginPath();
+					ctx.strokeStyle = "#4C58FD"
+					ctx.moveTo(x+radius,y);
+					ctx.lineTo(x + 150-radius, y);
+					ctx.stroke();
+
+						x = 460 ;//197.5
+						y = y +65;
+
+						letterX = x-9.5;
+						letterY = y+11;
+
+					ctx.beginPath();
+					ctx.fillStyle = "grey";
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.fill();
+					ctx.closePath();
+
+					ctx.beginPath();
+					ctx.strokeStyle = "black";
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.stroke();
+					ctx.closePath();
+
+
+					ctx.font = "30px Arial"
+					ctx.fillStyle = "white";
+					ctx.fillText("C", letterX, letterY);
+
+					x += 150;
+					letterX = x -9.5;
+
+
+					ctx.beginPath();
+					ctx.fillStyle = "grey";
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.fill();
+					ctx.closePath();
+
+					ctx.beginPath();
+					ctx.strokeStyle = "black";
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.stroke();
+					ctx.closePath();
+
+
+					ctx.font = "30px Arial"
+					ctx.fillStyle = "white";
+					ctx.fillText("3", letterX, letterY);
+
+
+					x = 460;
+
+					ctx.beginPath();
+					ctx.strokeStyle = "#4C58FD"
+					ctx.moveTo(x+radius,y);
+					ctx.lineTo(x + 150-radius, y);
+					ctx.stroke();
+
+
+						x = 460 ;//197.5
+						y = y +65;
+
+						letterX = x-9.5;
+						letterY = y+11;
+
+					ctx.beginPath();
+					ctx.fillStyle = "grey";
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.fill();
+					ctx.closePath();
+
+					ctx.beginPath();
+					ctx.strokeStyle = "black";
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.stroke();
+					ctx.closePath();
+
+
+					ctx.font = "30px Arial"
+					ctx.fillStyle = "white";
+					ctx.fillText("D", letterX, letterY);
+
+					x += 150;
+					letterX = x -9.5;
+
+
+					ctx.beginPath();
+					ctx.fillStyle = "grey";
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.fill();
+					ctx.closePath();
+
+					ctx.beginPath();
+					ctx.strokeStyle = "black";
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.stroke();
+					ctx.closePath();
+
+
+					ctx.font = "30px Arial"
+					ctx.fillStyle = "white";
+					ctx.fillText("4", letterX, letterY);
+
+
+					x = 460;
+
+					ctx.beginPath();
+					ctx.strokeStyle = "#4C58FD";
+					ctx.moveTo(x+radius,y);
+					ctx.lineTo(x + 150-radius, y);
+					ctx.stroke();
+
+
+					x = 460 ;//197.5
+					y = y +65;
+
+						letterX = x-9.5;
+						letterY = y+11;
+
+					ctx.beginPath();
+					ctx.fillStyle = "grey";
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.fill();
+					ctx.closePath();
+
+					ctx.beginPath();
+					ctx.strokeStyle = "black";
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.stroke();
+					ctx.closePath();
+
+
+					ctx.font = "30px Arial"
+					ctx.fillStyle = "white";
+					ctx.fillText("E", letterX, letterY);
+
+					x += 150;
+					letterX = x -9.5;
+
+
+					ctx.beginPath();
+					ctx.fillStyle = "grey";
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.fill();
+					ctx.closePath();
+
+					ctx.beginPath();
+					ctx.strokeStyle = "black";
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.stroke();
+					ctx.closePath();
+
+
+					ctx.font = "30px Arial"
+					ctx.fillStyle = "white";
+					ctx.fillText("0", letterX, letterY);
+
+
+					x = 460;
+
+					ctx.beginPath();
+					ctx.strokeStyle = "black";	 	
+					ctx.moveTo(x+radius,y);
+					ctx.lineTo(x + 150-radius, y);
+					ctx.stroke();
+
+				
+
+					x = 460 ;//197.5
+					y = y +65;
+
+						letterX = x-9.5;
+						letterY = y+11;
+
+					ctx.beginPath();
+					ctx.fillStyle = "grey";
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.fill();
+					ctx.closePath();
+
+					ctx.beginPath();
+					ctx.strokeStyle = "black";
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.stroke();
+					ctx.closePath();
+
+
+					ctx.font = "30px Arial"
+					ctx.fillStyle = "white";
+					ctx.fillText("A", letterX, letterY);
+
+					x += 150;
+					letterX = x -9.5;
+
+
+					ctx.beginPath();
+					ctx.fillStyle = "grey";
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.fill();
+					ctx.closePath();
+
+					ctx.beginPath();
+					ctx.strokeStyle = "black";
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.stroke();
+					ctx.closePath();
+
+
+					ctx.font = "30px Arial"
+					ctx.fillStyle = "white";
+					ctx.fillText("1", letterX, letterY);
+
+
+					x = 460;
+
+					ctx.beginPath();
+					ctx.strokeStyle = "black";	 	
+					ctx.moveTo(x+radius,y);
+					ctx.lineTo(x + 150-radius, y);
+					ctx.stroke();
+
+
+
+		ctx.beginPath();
+		ctx.save();
+		ctx.setLineDash([5,3]);
+		ctx.strokeStyle = matched;
+		ctx.rect(430,375,210,150);
+		ctx.stroke();
+		ctx.restore();
+		ctx.closePath();
+
+
+
+
+			x = 370;
+			y = 150;
+
+			ctx.beginPath();
+			ctx.fillStyle = unmatched;
+			ctx.arc(x,y,radius,0,2*Math.PI);
+			ctx.fill();
+			ctx.closePath();
+
+			ctx.beginPath();
+			ctx.strokeStyle = "black";
+			ctx.arc(x,y,radius,0,2*Math.PI);
+			ctx.stroke();
+			ctx.closePath();
+
+			ctx.font = "30px Arial";
+			ctx.fillStyle = "white";
+			ctx.fillText("E", x-10,y+10);
+
+
+			y =  y+radius;
+
+			ctx.beginPath();
+			ctx.strokeStyle = "black";
+			ctx.moveTo(x,y);
+			ctx.lineTo(x,y+30);
+			ctx.stroke();
+			ctx.closePath();
+
+			ctx.beginPath();
+			ctx.fillStyle = "black";
+			ctx.arc(x,y+50,radius,0,2*Math.PI);
+			ctx.fill();
+			ctx.closePath();
+
+			ctx.beginPath();
+			ctx.strokeStyle = "black";
+			ctx.arc(x,y+50,radius,0,2*Math.PI);
+			ctx.stroke();
+			ctx.closePath();
+
+	
+			ctx.font = "30px Arial";
+			ctx.fillStyle = "white";
+			ctx.fillText("0", x-8,y+60);
+
+			y =  y+radius*3;
+
+			ctx.beginPath();
+			ctx.strokeStyle = matched;
+			ctx.moveTo(x,y);
+			ctx.lineTo(x,y+30);
+			ctx.stroke();
+			ctx.closePath();
+
+
+			ctx.beginPath();
+			ctx.fillStyle = "black";
+			ctx.arc(x,y+55,radius,0,2*Math.PI);
+			ctx.fill();
+			ctx.closePath();
+		
+
+			ctx.font = "30px Arial";
+			ctx.fillStyle = "white";
+			ctx.fillText("A", x-10,y+65);
+
+			y =  y+radius*3;
+
+			ctx.beginPath();
+			ctx.strokeStyle = "black";
+			ctx.moveTo(x,y);
+			ctx.lineTo(x,y+40);
+			ctx.stroke();
+			ctx.closePath();
+
+			ctx.beginPath();
+			ctx.fillStyle = unmatched;
+			ctx.arc(x,y+60,radius,0,2*Math.PI);
+			ctx.fill();
+			ctx.closePath();
+
+	
+
+			ctx.beginPath();
+			ctx.strokeStyle = "black";
+			ctx.arc(x,y+60,radius,0,2*Math.PI);
+			ctx.stroke();
+			ctx.closePath();
+
+			ctx.font = "30px Arial";
+			ctx.fillStyle = "white";
+			ctx.fillText("1", x-10,y+70);
+
+
+
+
+	}
+
+
+	function addMatching1(){
+
+		ctx.clearRect(0,0,canvas.width,canvas.height);
+			x = 50 ;//197.5
+			y =160;
+			letterX = x-9.5;
+			letterY = y+11;
+			radius = 25;
+			tableX = 400;
+			tableY = 140;
+			ballColour = "black";
+
+			tableWidth = 250;
+			tableHeight = 400;;
+
+
+			
+			drawText();
+			drawDiagram2(x);
+			drawEdgesWithMatchings1(x);
+
+					//text
+					ctx.beginPath();
+					ctx.fillStyle = matched; 
+					ctx.rect(25,540,25,25);
+					ctx.fill();
+					ctx.closePath();
+
+					ctx.beginPath();
+					ctx.strokeStyle = "black"; 
+					ctx.rect(25,540,25,25);
+					ctx.stroke();
+					ctx.closePath();
+
+					ctx.font = "20px Arial";
+					ctx.fillStyle = "black";
+					ctx.fillText(" = MATCHING ", 50,560);
+
+					ctx.beginPath();
+					ctx.fillStyle = unmatched; 
+					ctx.rect(25,580,25,25);
+					ctx.fill();
+					ctx.closePath();
+
+					ctx.beginPath();
+					ctx.strokeStyle = "black"; 
+					ctx.rect(25,580,25,25);
+					ctx.stroke();
+					ctx.closePath();
+
+					ctx.font = "20px Arial";
+					ctx.fillStyle = "black";
+					ctx.fillText(" = UNMATCHED VERTICES", 50,600);
+
+					ctx.beginPath();
+					ctx.fillStyle = "black"; 
+					ctx.rect(25,620,25,25);
+					ctx.fill();
+					ctx.closePath();
+
+					ctx.beginPath();
+					ctx.strokeStyle = "black"; 
+					ctx.rect(25,620,25,25);
+					ctx.stroke();
+					ctx.closePath();
+
+					ctx.font = "20px Arial";
+					ctx.fillStyle = "black";
+					ctx.fillText(" = UNMATCHED EDGES", 50,640);
+
+
+					ctx.beginPath();
+					ctx.fillStyle = removed; 
+					ctx.rect(25,660,25,25);
+					ctx.fill();
+					ctx.closePath();
+
+					ctx.beginPath();
+					ctx.strokeStyle = "black"; 
+					ctx.rect(25,660,25,25);
+					ctx.stroke();
+					ctx.closePath();
+
+					ctx.font = "20px Arial";
+					ctx.fillStyle = "black";
+					ctx.fillText(" = REMOVED MATCHING", 50,680);
+
+
+
+		ctx.beginPath();
+					
+
+					ctx.fillStyle = "black";
+					ctx.rect(425,65,215,50);
+					ctx.fill();
+					ctx.closePath();
+
+					ctx.font = "30px Arial";
+					ctx.fillStyle = "white";
+					ctx.fillText("M",520,100);
+
+
+						x = 460 ;//197.5
+						y =150;
+
+						letterX = x-9.5;
+						letterY = y+11;
+
+					ctx.beginPath();
+					ctx.fillStyle = "grey";
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.fill();
+					ctx.closePath();
+
+					ctx.beginPath();
+					ctx.save();
+					ctx.setLineDash([5,3]);
+					ctx.strokeStyle = removed;
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.stroke();
+					ctx.restore();
+					ctx.closePath();
+
+
+					ctx.font = "30px Arial"
+					ctx.fillStyle = "white";
+					ctx.fillText("A", letterX, letterY);
+
+					x += 150;
+					letterX = x -9.5;
+
+
+					ctx.beginPath();
+					ctx.fillStyle = "grey";
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.fill();
+					ctx.closePath();
+
+					ctx.beginPath();
+					ctx.save();
+					ctx.setLineDash([5,3]);	
+					ctx.strokeStyle = removed;
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.stroke();
+					ctx.restore();
+					ctx.closePath();
+
+
+					ctx.font = "30px Arial"
+					ctx.fillStyle = "white";
+					ctx.fillText("0", letterX, letterY);
+
+
+					x = 460;
+
+					ctx.beginPath();
+					ctx.strokeStyle = "#4C58FD"
+					ctx.moveTo(x+radius,y);
+					ctx.lineTo(x + 150-radius, y);
+					ctx.stroke();
+
+						x = 460 ;//197.5
+						y +=65;
+
+						letterX = x-9.5;
+						letterY = y+11;
+
+					ctx.beginPath();
+					ctx.fillStyle = "grey";
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.fill();
+					ctx.closePath();
+
+					ctx.beginPath();
+					ctx.strokeStyle = "black";
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.stroke();
+					ctx.closePath();
+
+
+					ctx.font = "30px Arial"
+					ctx.fillStyle = "white";
+					ctx.fillText("B", letterX, letterY);
+
+					x += 150;
+					letterX = x -9.5;
+
+
+					ctx.beginPath();
+					ctx.fillStyle = "grey";
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.fill();
+					ctx.closePath();
+
+					ctx.beginPath();
+					ctx.strokeStyle = "black";
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.stroke();
+					ctx.closePath();
+
+
+					ctx.font = "30px Arial"
+					ctx.fillStyle = "white";
+					ctx.fillText("2", letterX, letterY);
+
+
+					x = 460;
+
+					ctx.beginPath();
+					ctx.strokeStyle = "#4C58FD"
+					ctx.moveTo(x+radius,y);
+					ctx.lineTo(x + 150-radius, y);
+					ctx.stroke();
+
+
+					x = 460;
+
+					ctx.beginPath();
+					ctx.strokeStyle = "#4C58FD"
+					ctx.moveTo(x+radius,y);
+					ctx.lineTo(x + 150-radius, y);
+					ctx.stroke();
+
+						x = 460 ;//197.5
+						y = y +65;
+
+						letterX = x-9.5;
+						letterY = y+11;
+
+					ctx.beginPath();
+					ctx.fillStyle = "grey";
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.fill();
+					ctx.closePath();
+
+					ctx.beginPath();
+					ctx.strokeStyle = "black";
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.stroke();
+					ctx.closePath();
+
+
+					ctx.font = "30px Arial"
+					ctx.fillStyle = "white";
+					ctx.fillText("C", letterX, letterY);
+
+					x += 150;
+					letterX = x -9.5;
+
+
+					ctx.beginPath();
+					ctx.fillStyle = "grey";
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.fill();
+					ctx.closePath();
+
+					ctx.beginPath();
+					ctx.strokeStyle = "black";
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.stroke();
+					ctx.closePath();
+
+
+					ctx.font = "30px Arial"
+					ctx.fillStyle = "white";
+					ctx.fillText("3", letterX, letterY);
+
+
+					x = 460;
+
+					ctx.beginPath();
+					ctx.strokeStyle = "#4C58FD"
+					ctx.moveTo(x+radius,y);
+					ctx.lineTo(x + 150-radius, y);
+					ctx.stroke();
+
+
+						x = 460 ;//197.5
+						y = y +65;
+
+						letterX = x-9.5;
+						letterY = y+11;
+
+					ctx.beginPath();
+					ctx.fillStyle = "grey";
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.fill();
+					ctx.closePath();
+
+					ctx.beginPath();
+					ctx.strokeStyle = "black";
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.stroke();
+					ctx.closePath();
+
+
+					ctx.font = "30px Arial"
+					ctx.fillStyle = "white";
+					ctx.fillText("D", letterX, letterY);
+
+					x += 150;
+					letterX = x -9.5;
+
+
+					ctx.beginPath();
+					ctx.fillStyle = "grey";
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.fill();
+					ctx.closePath();
+
+					ctx.beginPath();
+					ctx.strokeStyle = "black";
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.stroke();
+					ctx.closePath();
+
+
+					ctx.font = "30px Arial"
+					ctx.fillStyle = "white";
+					ctx.fillText("4", letterX, letterY);
+
+
+					x = 460;
+
+					ctx.beginPath();
+					ctx.strokeStyle = "#4C58FD"
+					ctx.moveTo(x+radius,y);
+					ctx.lineTo(x + 150-radius, y);
+					ctx.stroke();
+
+
+					x = 460 ;//197.5
+					y = y +65;
+
+						letterX = x-9.5;
+						letterY = y+11;
+
+					ctx.beginPath();
+					ctx.fillStyle = "grey";
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.fill();
+					ctx.closePath();
+
+					ctx.beginPath();
+					ctx.strokeStyle = "black";
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.stroke();
+					ctx.closePath();
+
+
+					ctx.font = "30px Arial"
+					ctx.fillStyle = "white";
+					ctx.fillText("E", letterX, letterY);
+
+					x += 150;
+					letterX = x -9.5;
+
+
+					ctx.beginPath();
+					ctx.fillStyle = "grey";
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.fill();
+					ctx.closePath();
+
+					ctx.beginPath();
+					ctx.strokeStyle = "black";
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.stroke();
+					ctx.closePath();
+
+
+					ctx.font = "30px Arial"
+					ctx.fillStyle = "white";
+					ctx.fillText("0", letterX, letterY);
+
+
+					x = 460;
+
+					ctx.beginPath();
+					ctx.strokeStyle = "black";	 	
+					ctx.moveTo(x+radius,y);
+					ctx.lineTo(x + 150-radius, y);
+					ctx.stroke();
+
+
+
+
+
+			x = 370;
+			y = 150;
+
+			ctx.beginPath();
+			ctx.fillStyle = unmatched;
+			ctx.arc(x,y,radius,0,2*Math.PI);
+			ctx.fill();
+			ctx.closePath();
+
+			ctx.beginPath();
+			ctx.strokeStyle = "black";
+			ctx.arc(x,y,radius,0,2*Math.PI);
+			ctx.stroke();
+			ctx.closePath();
+
+			ctx.beginPath();
+			ctx.save();
+			ctx.setLineDash([5,3]);
+			ctx.strokeStyle = matched;
+			ctx.arc(x,y,radius+2,0,2*Math.PI);
+			ctx.stroke();
+			ctx.restore();
+			ctx.closePath();
+
+			ctx.font = "30px Arial";
+			ctx.fillStyle = "white";
+			ctx.fillText("E", x-10,y+10);
+
+
+			y =  y+radius;
+
+			ctx.beginPath();
+			ctx.strokeStyle = "black";
+			ctx.moveTo(x,y);
+			ctx.lineTo(x,y+30);
+			ctx.stroke();
+			ctx.closePath();
+
+			ctx.beginPath();
+			ctx.fillStyle = "black";
+			ctx.arc(x,y+50,radius,0,2*Math.PI);
+			ctx.fill();
+			ctx.closePath();
+
+			ctx.beginPath();
+			ctx.strokeStyle = "black";
+			ctx.arc(x,y+50,radius,0,2*Math.PI);
+			ctx.stroke();
+			ctx.closePath();
+
+			ctx.beginPath();
+			ctx.save();
+			ctx.setLineDash([5,3]);
+			ctx.strokeStyle = matched;
+			ctx.arc(x,y+50,radius+2,0,2*Math.PI);
+			ctx.stroke();
+			ctx.restore();
+			ctx.closePath();
+
+			ctx.font = "30px Arial";
+			ctx.fillStyle = "white";
+			ctx.fillText("0", x-8,y+60);
+
+			y =  y+radius*3;
+
+			ctx.beginPath();
+			ctx.strokeStyle = matched;
+			ctx.moveTo(x,y);
+			ctx.lineTo(x,y+30);
+			ctx.stroke();
+			ctx.closePath();
+
+
+			ctx.beginPath();
+			ctx.fillStyle = "black";
+			ctx.arc(x,y+55,radius,0,2*Math.PI);
+			ctx.fill();
+			ctx.closePath();		
+
+			ctx.font = "30px Arial";
+			ctx.fillStyle = "white";
+			ctx.fillText("A", x-10,y+65);
+
+			y =  y+radius*3;
+
+			ctx.beginPath();
+			ctx.strokeStyle = "black";
+			ctx.moveTo(x,y);
+			ctx.lineTo(x,y+40);
+			ctx.stroke();
+			ctx.closePath();
+
+			ctx.beginPath();
+			ctx.fillStyle = unmatched;
+			ctx.arc(x,y+60,radius,0,2*Math.PI);
+			ctx.fill();
+			ctx.closePath();
+
+			ctx.beginPath();
+			ctx.strokeStyle = "black";
+			ctx.arc(x,y+60,radius,0,2*Math.PI);
+			ctx.stroke();
+			ctx.closePath();
+
+			ctx.font = "30px Arial";
+			ctx.fillStyle = "white";
+			ctx.fillText("1", x-10,y+70);
+
+
+	}
+
+
+	function addMatching2(){
+
+			ctx.clearRect(0,0,canvas.width,canvas.height);
+			x = 50 ;//197.5
+			y =160;
+			letterX = x-9.5;
+			letterY = y+11;
+			radius = 25;
+			tableX = 400;
+			tableY = 140;
+			ballColour = "black";
+
+			tableWidth = 250;
+			tableHeight = 400;;
+
+
+			
+			drawText();
+			drawDiagram2(x);
+			drawEdgesWithMatchings1(x);
+
+					//text
+					ctx.beginPath();
+					ctx.fillStyle = matched; 
+					ctx.rect(25,540,25,25);
+					ctx.fill();
+					ctx.closePath();
+
+					ctx.beginPath();
+					ctx.strokeStyle = "black"; 
+					ctx.rect(25,540,25,25);
+					ctx.stroke();
+					ctx.closePath();
+
+					ctx.font = "20px Arial";
+					ctx.fillStyle = "black";
+					ctx.fillText(" = MATCHING ", 50,560);
+
+					ctx.beginPath();
+					ctx.fillStyle = unmatched; 
+					ctx.rect(25,580,25,25);
+					ctx.fill();
+					ctx.closePath();
+
+					ctx.beginPath();
+					ctx.strokeStyle = "black"; 
+					ctx.rect(25,580,25,25);
+					ctx.stroke();
+					ctx.closePath();
+
+					ctx.font = "20px Arial";
+					ctx.fillStyle = "black";
+					ctx.fillText(" = UNMATCHED VERTICES", 50,600);
+
+					ctx.beginPath();
+					ctx.fillStyle = "black"; 
+					ctx.rect(25,620,25,25);
+					ctx.fill();
+					ctx.closePath();
+
+					ctx.beginPath();
+					ctx.strokeStyle = "black"; 
+					ctx.rect(25,620,25,25);
+					ctx.stroke();
+					ctx.closePath();
+
+					ctx.font = "20px Arial";
+					ctx.fillStyle = "black";
+					ctx.fillText(" = UNMATCHED EDGES", 50,640);
+
+
+					ctx.beginPath();
+					ctx.fillStyle = removed; 
+					ctx.rect(25,660,25,25);
+					ctx.fill();
+					ctx.closePath();
+
+					ctx.beginPath();
+					ctx.strokeStyle = "black"; 
+					ctx.rect(25,660,25,25);
+					ctx.stroke();
+					ctx.closePath();
+
+					ctx.font = "20px Arial";
+					ctx.fillStyle = "black";
+					ctx.fillText(" = REMOVED MATCHING", 50,680);
+
+
+
+			ctx.beginPath();
+					
+
+					ctx.fillStyle = "black";
+					ctx.rect(425,65,215,50);
+					ctx.fill();
+					ctx.closePath();
+
+					ctx.font = "30px Arial";
+					ctx.fillStyle = "white";
+					ctx.fillText("M",520,100);
+
+
+						x = 460 ;//197.5
+						y =150;
+
+						letterX = x-9.5;
+						letterY = y+11;
+
+					ctx.beginPath();
+					ctx.fillStyle = "grey";
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.fill();
+					ctx.closePath();
+
+					ctx.beginPath();
+					ctx.save();
+					ctx.setLineDash([5,3]);
+					ctx.strokeStyle = removed;
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.stroke();
+					ctx.restore();
+					ctx.closePath();
+
+
+					ctx.font = "30px Arial"
+					ctx.fillStyle = "white";
+					ctx.fillText("A", letterX, letterY);
+
+					x += 150;
+					letterX = x -9.5;
+
+
+					ctx.beginPath();
+					ctx.fillStyle = "grey";
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.fill();
+					ctx.closePath();
+
+					ctx.beginPath();
+					ctx.save();
+					ctx.setLineDash([5,3]);	
+					ctx.strokeStyle = removed;
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.stroke();
+					ctx.restore();
+					ctx.closePath();
+
+
+					ctx.font = "30px Arial"
+					ctx.fillStyle = "white";
+					ctx.fillText("0", letterX, letterY);
+
+
+					x = 460;
+
+					ctx.beginPath();
+					ctx.strokeStyle = "#4C58FD";
+					ctx.moveTo(x+radius,y);
+					ctx.lineTo(x + 150-radius, y);
+					ctx.stroke();
+
+						x = 460 ;//197.5
+						y +=65;
+
+						letterX = x-9.5;
+						letterY = y+11;
+
+					ctx.beginPath();
+					ctx.fillStyle = "grey";
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.fill();
+					ctx.closePath();
+
+					ctx.beginPath();
+					ctx.strokeStyle = "black";
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.stroke();
+					ctx.closePath();
+
+
+					ctx.font = "30px Arial"
+					ctx.fillStyle = "white";
+					ctx.fillText("B", letterX, letterY);
+
+					x += 150;
+					letterX = x -9.5;
+
+
+					ctx.beginPath();
+					ctx.fillStyle = "grey";
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.fill();
+					ctx.closePath();
+
+					ctx.beginPath();
+					ctx.strokeStyle = "black";
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.stroke();
+					ctx.closePath();
+
+
+					ctx.font = "30px Arial"
+					ctx.fillStyle = "white";
+					ctx.fillText("2", letterX, letterY);
+
+
+					x = 460;
+
+					ctx.beginPath();
+					ctx.strokeStyle = "#4C58FD"
+					ctx.moveTo(x+radius,y);
+					ctx.lineTo(x + 150-radius, y);
+					ctx.stroke();
+
+
+					x = 460;
+
+					ctx.beginPath();
+					ctx.strokeStyle = "#4C58FD"
+					ctx.moveTo(x+radius,y);
+					ctx.lineTo(x + 150-radius, y);
+					ctx.stroke();
+
+						x = 460 ;//197.5
+						y = y +65;
+
+						letterX = x-9.5;
+						letterY = y+11;
+
+					ctx.beginPath();
+					ctx.fillStyle = "grey";
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.fill();
+					ctx.closePath();
+
+					ctx.beginPath();
+					ctx.strokeStyle = "black";
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.stroke();
+					ctx.closePath();
+
+
+					ctx.font = "30px Arial"
+					ctx.fillStyle = "white";
+					ctx.fillText("C", letterX, letterY);
+
+					x += 150;
+					letterX = x -9.5;
+
+
+					ctx.beginPath();
+					ctx.fillStyle = "grey";
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.fill();
+					ctx.closePath();
+
+					ctx.beginPath();
+					ctx.strokeStyle = "black";
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.stroke();
+					ctx.closePath();
+
+
+					ctx.font = "30px Arial"
+					ctx.fillStyle = "white";
+					ctx.fillText("3", letterX, letterY);
+
+
+					x = 460;
+
+					ctx.beginPath();
+					ctx.strokeStyle = "#4C58FD"
+					ctx.moveTo(x+radius,y);
+					ctx.lineTo(x + 150-radius, y);
+					ctx.stroke();
+
+
+						x = 460 ;//197.5
+						y = y +65;
+
+						letterX = x-9.5;
+						letterY = y+11;
+
+					ctx.beginPath();
+					ctx.fillStyle = "grey";
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.fill();
+					ctx.closePath();
+
+					ctx.beginPath();
+					ctx.strokeStyle = "black";
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.stroke();
+					ctx.closePath();
+
+
+					ctx.font = "30px Arial"
+					ctx.fillStyle = "white";
+					ctx.fillText("D", letterX, letterY);
+
+					x += 150;
+					letterX = x -9.5;
+
+
+					ctx.beginPath();
+					ctx.fillStyle = "grey";
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.fill();
+					ctx.closePath();
+
+					ctx.beginPath();
+					ctx.strokeStyle = "black";
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.stroke();
+					ctx.closePath();
+
+
+					ctx.font = "30px Arial"
+					ctx.fillStyle = "white";
+					ctx.fillText("4", letterX, letterY);
+
+
+					x = 460;
+
+					ctx.beginPath();
+					ctx.strokeStyle = "#4C58FD"
+					ctx.moveTo(x+radius,y);
+					ctx.lineTo(x + 150-radius, y);
+					ctx.stroke();
+
+
+					x = 460 ;//197.5
+					y = y +65;
+
+						letterX = x-9.5;
+						letterY = y+11;
+
+					ctx.beginPath();
+					ctx.fillStyle = "grey";
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.fill();
+					ctx.closePath();
+
+					ctx.beginPath();
+					ctx.strokeStyle = "black";
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.stroke();
+					ctx.closePath();
+
+
+					ctx.font = "30px Arial"
+					ctx.fillStyle = "white";
+					ctx.fillText("E", letterX, letterY);
+
+					x += 150;
+					letterX = x -9.5;
+
+
+					ctx.beginPath();
+					ctx.fillStyle = "grey";
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.fill();
+					ctx.closePath();
+
+					ctx.beginPath();
+					ctx.strokeStyle = "black";
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.stroke();
+					ctx.closePath();
+
+
+					ctx.font = "30px Arial"
+					ctx.fillStyle = "white";
+					ctx.fillText("0", letterX, letterY);
+
+
+					x = 460;
+
+					ctx.beginPath();
+					ctx.strokeStyle = "black";	 	
+					ctx.moveTo(x+radius,y);
+					ctx.lineTo(x + 150-radius, y);
+					ctx.stroke();
+
+
+
+
+
+			x = 370;
+			y = 150;
+
+			ctx.beginPath();
+			ctx.fillStyle = unmatched;
+			ctx.arc(x,y,radius,0,2*Math.PI);
+			ctx.fill();
+			ctx.closePath();
+
+			ctx.beginPath();
+			ctx.strokeStyle = "black";
+			ctx.arc(x,y,radius,0,2*Math.PI);
+			ctx.stroke();
+			ctx.closePath();
+
+			ctx.font = "30px Arial";
+			ctx.fillStyle = "white";
+			ctx.fillText("E", x-10,y+10);
+
+
+			y =  y+radius;
+
+			ctx.beginPath();
+			ctx.strokeStyle = "black";
+			ctx.moveTo(x,y);
+			ctx.lineTo(x,y+30);
+			ctx.stroke();
+			ctx.closePath();
+
+			ctx.beginPath();
+			ctx.fillStyle = "black";
+			ctx.arc(x,y+50,radius,0,2*Math.PI);
+			ctx.fill();
+			ctx.closePath();
+
+			ctx.beginPath();
+			ctx.strokeStyle = "black";
+			ctx.arc(x,y+50,radius,0,2*Math.PI);
+			ctx.stroke();
+			ctx.closePath();
+
+			ctx.beginPath();
+			ctx.save();
+			ctx.setLineDash([5,3]);
+			ctx.strokeStyle = removed;
+			ctx.arc(x,y+50,radius+2,0,2*Math.PI);
+			ctx.stroke();
+			ctx.restore();
+			ctx.closePath();
+
+			ctx.font = "30px Arial";
+			ctx.fillStyle = "white";
+			ctx.fillText("0", x-8,y+60);
+
+			y =  y+radius*3;
+
+			ctx.beginPath();
+			ctx.strokeStyle = matched;
+			ctx.moveTo(x,y);
+			ctx.lineTo(x,y+30);
+			ctx.stroke();
+			ctx.closePath();
+
+
+			ctx.beginPath();
+			ctx.fillStyle = "black";
+			ctx.arc(x,y+55,radius,0,2*Math.PI);
+			ctx.fill();
+			ctx.closePath();
+
+			ctx.beginPath();
+			ctx.save();
+			ctx.setLineDash([5,3]);
+			ctx.strokeStyle = removed;
+			ctx.arc(x,y+55,radius+2,0,2*Math.PI);
+			ctx.stroke();
+			ctx.restore();
+			ctx.closePath();
+		
+
+			ctx.font = "30px Arial";
+			ctx.fillStyle = "white";
+			ctx.fillText("A", x-10,y+65);
+
+			y =  y+radius*3;
+
+			ctx.beginPath();
+			ctx.strokeStyle = "black";
+			ctx.moveTo(x,y);
+			ctx.lineTo(x,y+40);
+			ctx.stroke();
+			ctx.closePath();
+
+			ctx.beginPath();
+			ctx.fillStyle = unmatched;
+			ctx.arc(x,y+60,radius,0,2*Math.PI);
+			ctx.fill();
+			ctx.closePath();
+
+			ctx.beginPath();
+			ctx.strokeStyle = "black";
+			ctx.arc(x,y+60,radius,0,2*Math.PI);
+			ctx.stroke();
+			ctx.closePath();
+
+			ctx.font = "30px Arial";
+			ctx.fillStyle = "white";
+			ctx.fillText("1", x-10,y+70);
+
+
+
+
+	}
+
+	function addMatching3(){
+
+		ctx.clearRect(0,0,canvas.width,canvas.height);
+			x = 50 ;//197.5
+			y =160;
+			letterX = x-9.5;
+			letterY = y+11;
+			radius = 25;
+			tableX = 400;
+			tableY = 140;
+			ballColour = "black";
+
+			tableWidth = 250;
+			tableHeight = 400;;
+
+
+			
+			drawText();
+			drawDiagram2(x);
+			drawEdgesWithMatchings1(x);
+
+					//text
+					ctx.beginPath();
+					ctx.fillStyle = matched; 
+					ctx.rect(25,540,25,25);
+					ctx.fill();
+					ctx.closePath();
+
+					ctx.beginPath();
+					ctx.strokeStyle = "black"; 
+					ctx.rect(25,540,25,25);
+					ctx.stroke();
+					ctx.closePath();
+
+					ctx.font = "20px Arial";
+					ctx.fillStyle = "black";
+					ctx.fillText(" = MATCHING ", 50,560);
+
+					ctx.beginPath();
+					ctx.fillStyle = unmatched; 
+					ctx.rect(25,580,25,25);
+					ctx.fill();
+					ctx.closePath();
+
+					ctx.beginPath();
+					ctx.strokeStyle = "black"; 
+					ctx.rect(25,580,25,25);
+					ctx.stroke();
+					ctx.closePath();
+
+					ctx.font = "20px Arial";
+					ctx.fillStyle = "black";
+					ctx.fillText(" = UNMATCHED VERTICES", 50,600);
+
+					ctx.beginPath();
+					ctx.fillStyle = "black"; 
+					ctx.rect(25,620,25,25);
+					ctx.fill();
+					ctx.closePath();
+
+					ctx.beginPath();
+					ctx.strokeStyle = "black"; 
+					ctx.rect(25,620,25,25);
+					ctx.stroke();
+					ctx.closePath();
+
+					ctx.font = "20px Arial";
+					ctx.fillStyle = "black";
+					ctx.fillText(" = UNMATCHED EDGES", 50,640);
+
+
+					ctx.beginPath();
+					ctx.fillStyle = removed; 
+					ctx.rect(25,660,25,25);
+					ctx.fill();
+					ctx.closePath();
+
+					ctx.beginPath();
+					ctx.strokeStyle = "black"; 
+					ctx.rect(25,660,25,25);
+					ctx.stroke();
+					ctx.closePath();
+
+					ctx.font = "20px Arial";
+					ctx.fillStyle = "black";
+					ctx.fillText(" = REMOVED MATCHING", 50,680);
+
+
+
+		ctx.beginPath();
+					
+
+					ctx.fillStyle = "black";
+					ctx.rect(425,65,215,50);
+					ctx.fill();
+					ctx.closePath();
+
+					ctx.font = "30px Arial";
+					ctx.fillStyle = "white";
+					ctx.fillText("M",520,100);
+
+
+						x = 460 ;//197.5
+						y =150;
+
+						letterX = x-9.5;
+						letterY = y+11;
+
+					ctx.beginPath();
+					ctx.fillStyle = "grey";
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.fill();
+					ctx.closePath();
+
+					ctx.beginPath();
+					ctx.save();
+					ctx.setLineDash([5,3]);
+					ctx.strokeStyle = removed;
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.stroke();
+					ctx.restore();
+					ctx.closePath();
+
+
+					ctx.font = "30px Arial"
+					ctx.fillStyle = "white";
+					ctx.fillText("A", letterX, letterY);
+
+					x += 150;
+					letterX = x -9.5;
+
+
+					ctx.beginPath();
+					ctx.fillStyle = "grey";
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.fill();
+					ctx.closePath();
+
+					ctx.beginPath();
+					ctx.save();
+					ctx.setLineDash([5,3]);	
+					ctx.strokeStyle = removed;
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.stroke();
+					ctx.restore();
+					ctx.closePath();
+
+
+					ctx.font = "30px Arial"
+					ctx.fillStyle = "white";
+					ctx.fillText("0", letterX, letterY);
+
+
+					x = 460;
+
+					ctx.beginPath();
+					ctx.strokeStyle = "#4C58FD";
+					ctx.moveTo(x+radius,y);
+					ctx.lineTo(x + 150-radius, y);
+					ctx.stroke();
+
+						x = 460 ;//197.5
+						y +=65;
+
+						letterX = x-9.5;
+						letterY = y+11;
+
+					ctx.beginPath();
+					ctx.fillStyle = "grey";
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.fill();
+					ctx.closePath();
+
+					ctx.beginPath();
+					ctx.strokeStyle = "black";
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.stroke();
+					ctx.closePath();
+
+
+					ctx.font = "30px Arial"
+					ctx.fillStyle = "white";
+					ctx.fillText("B", letterX, letterY);
+
+					x += 150;
+					letterX = x -9.5;
+
+
+					ctx.beginPath();
+					ctx.fillStyle = "grey";
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.fill();
+					ctx.closePath();
+
+					ctx.beginPath();
+					ctx.strokeStyle = "black";
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.stroke();
+					ctx.closePath();
+
+
+					ctx.font = "30px Arial"
+					ctx.fillStyle = "white";
+					ctx.fillText("2", letterX, letterY);
+
+
+					x = 460;
+
+					ctx.beginPath();
+					ctx.strokeStyle = "#4C58FD"
+					ctx.moveTo(x+radius,y);
+					ctx.lineTo(x + 150-radius, y);
+					ctx.stroke();
+
+
+					x = 460;
+
+					ctx.beginPath();
+					ctx.strokeStyle = "#4C58FD"
+					ctx.moveTo(x+radius,y);
+					ctx.lineTo(x + 150-radius, y);
+					ctx.stroke();
+
+						x = 460 ;//197.5
+						y = y +65;
+
+						letterX = x-9.5;
+						letterY = y+11;
+
+					ctx.beginPath();
+					ctx.fillStyle = "grey";
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.fill();
+					ctx.closePath();
+
+					ctx.beginPath();
+					ctx.strokeStyle = "black";
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.stroke();
+					ctx.closePath();
+
+
+					ctx.font = "30px Arial"
+					ctx.fillStyle = "white";
+					ctx.fillText("C", letterX, letterY);
+
+					x += 150;
+					letterX = x -9.5;
+
+
+					ctx.beginPath();
+					ctx.fillStyle = "grey";
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.fill();
+					ctx.closePath();
+
+					ctx.beginPath();
+					ctx.strokeStyle = "black";
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.stroke();
+					ctx.closePath();
+
+
+					ctx.font = "30px Arial"
+					ctx.fillStyle = "white";
+					ctx.fillText("3", letterX, letterY);
+
+
+					x = 460;
+
+					ctx.beginPath();
+					ctx.strokeStyle = "#4C58FD"
+					ctx.moveTo(x+radius,y);
+					ctx.lineTo(x + 150-radius, y);
+					ctx.stroke();
+
+
+						x = 460 ;//197.5
+						y = y +65;
+
+						letterX = x-9.5;
+						letterY = y+11;
+
+					ctx.beginPath();
+					ctx.fillStyle = "grey";
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.fill();
+					ctx.closePath();
+
+					ctx.beginPath();
+					ctx.strokeStyle = "black";
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.stroke();
+					ctx.closePath();
+
+
+					ctx.font = "30px Arial"
+					ctx.fillStyle = "white";
+					ctx.fillText("D", letterX, letterY);
+
+					x += 150;
+					letterX = x -9.5;
+
+
+					ctx.beginPath();
+					ctx.fillStyle = "grey";
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.fill();
+					ctx.closePath();
+
+					ctx.beginPath();
+					ctx.strokeStyle = "black";
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.stroke();
+					ctx.closePath();
+
+
+					ctx.font = "30px Arial"
+					ctx.fillStyle = "white";
+					ctx.fillText("4", letterX, letterY);
+
+
+					x = 460;
+
+					ctx.beginPath();
+					ctx.strokeStyle = "#4C58FD"
+					ctx.moveTo(x+radius,y);
+					ctx.lineTo(x + 150-radius, y);
+					ctx.stroke();
+
+
+					x = 460 ;//197.5
+					y = y +65;
+
+						letterX = x-9.5;
+						letterY = y+11;
+
+					ctx.beginPath();
+					ctx.fillStyle = "grey";
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.fill();
+					ctx.closePath();
+
+					ctx.beginPath();
+					ctx.strokeStyle = "black";
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.stroke();
+					ctx.closePath();
+
+
+					ctx.font = "30px Arial"
+					ctx.fillStyle = "white";
+					ctx.fillText("E", letterX, letterY);
+
+					x += 150;
+					letterX = x -9.5;
+
+
+					ctx.beginPath();
+					ctx.fillStyle = "grey";
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.fill();
+					ctx.closePath();
+
+					ctx.beginPath();
+					ctx.strokeStyle = "black";
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.stroke();
+					ctx.closePath();
+
+
+					ctx.font = "30px Arial"
+					ctx.fillStyle = "white";
+					ctx.fillText("0", letterX, letterY);
+
+
+					x = 460;
+
+					ctx.beginPath();
+					ctx.strokeStyle = "black";	 	
+					ctx.moveTo(x+radius,y);
+					ctx.lineTo(x + 150-radius, y);
+					ctx.stroke();
+
+
+
+					x = 460 ;//197.5
+					y = y +65;
+
+						letterX = x-9.5;
+						letterY = y+11;
+
+					ctx.beginPath();
+					ctx.fillStyle = "grey";
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.fill();
+					ctx.closePath();
+
+					ctx.beginPath();
+					ctx.strokeStyle = "black";
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.stroke();
+					ctx.closePath();
+
+
+					ctx.font = "30px Arial"
+					ctx.fillStyle = "white";
+					ctx.fillText("A", letterX, letterY);
+
+					x += 150;
+					letterX = x -9.5;
+
+
+					ctx.beginPath();
+					ctx.fillStyle = "grey";
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.fill();
+					ctx.closePath();
+
+					ctx.beginPath();
+					ctx.strokeStyle = "black";
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.stroke();
+					ctx.closePath();
+
+
+					ctx.font = "30px Arial"
+					ctx.fillStyle = "white";
+					ctx.fillText("1", letterX, letterY);
+
+
+					x = 460;
+
+					ctx.beginPath();
+					ctx.strokeStyle = "black";	 	
+					ctx.moveTo(x+radius,y);
+					ctx.lineTo(x + 150-radius, y);
+					ctx.stroke();
+
+
+
+
+
+			x = 370;
+			y = 150;
+
+			ctx.beginPath();
+			ctx.fillStyle = unmatched;
+			ctx.arc(x,y,radius,0,2*Math.PI);
+			ctx.fill();
+			ctx.closePath();
+
+			ctx.beginPath();
+			ctx.strokeStyle = "black";
+			ctx.arc(x,y,radius,0,2*Math.PI);
+			ctx.stroke();
+			ctx.closePath();
+
+			ctx.font = "30px Arial";
+			ctx.fillStyle = "white";
+			ctx.fillText("E", x-10,y+10);
+
+
+			y =  y+radius;
+
+			ctx.beginPath();
+			ctx.strokeStyle = "black";
+			ctx.moveTo(x,y);
+			ctx.lineTo(x,y+30);
+			ctx.stroke();
+			ctx.closePath();
+
+			ctx.beginPath();
+			ctx.fillStyle = "black";
+			ctx.arc(x,y+50,radius,0,2*Math.PI);
+			ctx.fill();
+			ctx.closePath();
+
+			ctx.beginPath();
+			ctx.strokeStyle = "black";
+			ctx.arc(x,y+50,radius,0,2*Math.PI);
+			ctx.stroke();
+			ctx.closePath();
+
+	
+			ctx.font = "30px Arial";
+			ctx.fillStyle = "white";
+			ctx.fillText("0", x-8,y+60);
+
+			y =  y+radius*3;
+
+			ctx.beginPath();
+			ctx.strokeStyle = matched;
+			ctx.moveTo(x,y);
+			ctx.lineTo(x,y+30);
+			ctx.stroke();
+			ctx.closePath();
+
+
+			ctx.beginPath();
+			ctx.fillStyle = "black";
+			ctx.arc(x,y+55,radius,0,2*Math.PI);
+			ctx.fill();
+			ctx.closePath();
+
+			ctx.beginPath();
+			ctx.save();
+			ctx.setLineDash([5,3]);
+			ctx.strokeStyle = matched;
+			ctx.arc(x,y+55,radius+2,0,2*Math.PI);
+			ctx.stroke();
+			ctx.restore();
+			ctx.closePath();
+		
+
+			ctx.font = "30px Arial";
+			ctx.fillStyle = "white";
+			ctx.fillText("A", x-10,y+65);
+
+			y =  y+radius*3;
+
+			ctx.beginPath();
+			ctx.strokeStyle = "black";
+			ctx.moveTo(x,y);
+			ctx.lineTo(x,y+40);
+			ctx.stroke();
+			ctx.closePath();
+
+			ctx.beginPath();
+			ctx.fillStyle = unmatched;
+			ctx.arc(x,y+60,radius,0,2*Math.PI);
+			ctx.fill();
+			ctx.closePath();
+
+			ctx.beginPath();
+			ctx.save();
+			ctx.setLineDash([5,3]);
+			ctx.strokeStyle = matched;
+			ctx.arc(x,y+60,radius+2,0,2*Math.PI);
+			ctx.stroke();
+			ctx.restore();
+			ctx.closePath();
+
+			ctx.beginPath();
+			ctx.strokeStyle = "black";
+			ctx.arc(x,y+60,radius,0,2*Math.PI);
+			ctx.stroke();
+			ctx.closePath();
+
+			ctx.font = "30px Arial";
+			ctx.fillStyle = "white";
+			ctx.fillText("1", x-10,y+70);
+
+
+
+
+
+	}
+
+
+
+
+	function removeMatching(){
+		ctx.clearRect(0,0,canvas.width,canvas.height);
+			x = 50 ;//197.5
+			y =160;
+			letterX = x-9.5;
+			letterY = y+11;
+			radius = 25;
+			tableX = 400;
+			tableY = 140;
+			ballColour = "black";
+
+			tableWidth = 250;
+			tableHeight = 400;;
+
+
+			
+			drawText();
+			drawDiagram2(x);
+			drawEdgesWithMatchings1(x);
+
+					//text
+					ctx.beginPath();
+					ctx.fillStyle = matched; 
+					ctx.rect(25,540,25,25);
+					ctx.fill();
+					ctx.closePath();
+
+					ctx.beginPath();
+					ctx.strokeStyle = "black"; 
+					ctx.rect(25,540,25,25);
+					ctx.stroke();
+					ctx.closePath();
+
+					ctx.font = "20px Arial";
+					ctx.fillStyle = "black";
+					ctx.fillText(" = MATCHING ", 50,560);
+
+					ctx.beginPath();
+					ctx.fillStyle = unmatched; 
+					ctx.rect(25,580,25,25);
+					ctx.fill();
+					ctx.closePath();
+
+					ctx.beginPath();
+					ctx.strokeStyle = "black"; 
+					ctx.rect(25,580,25,25);
+					ctx.stroke();
+					ctx.closePath();
+
+					ctx.font = "20px Arial";
+					ctx.fillStyle = "black";
+					ctx.fillText(" = UNMATCHED VERTICES", 50,600);
+
+					ctx.beginPath();
+					ctx.fillStyle = "black"; 
+					ctx.rect(25,620,25,25);
+					ctx.fill();
+					ctx.closePath();
+
+					ctx.beginPath();
+					ctx.strokeStyle = "black"; 
+					ctx.rect(25,620,25,25);
+					ctx.stroke();
+					ctx.closePath();
+
+					ctx.font = "20px Arial";
+					ctx.fillStyle = "black";
+					ctx.fillText(" = UNMATCHED EDGES", 50,640);
+
+
+					ctx.beginPath();
+					ctx.fillStyle = removed; 
+					ctx.rect(25,660,25,25);
+					ctx.fill();
+					ctx.closePath();
+
+					ctx.beginPath();
+					ctx.strokeStyle = "black"; 
+					ctx.rect(25,660,25,25);
+					ctx.stroke();
+					ctx.closePath();
+
+					ctx.font = "20px Arial";
+					ctx.fillStyle = "black";
+					ctx.fillText(" = REMOVED MATCHING", 50,680);
+
+		//augentingpath
+								x = 370;
+								y = 150;
+
+								ctx.beginPath();
+								ctx.fillStyle = unmatched;
+								ctx.arc(x,y,radius,0,2*Math.PI);
+								ctx.fill();
+								ctx.closePath();
+
+								ctx.beginPath();
+								ctx.strokeStyle = "black";
+								ctx.arc(x,y,radius,0,2*Math.PI);
+								ctx.stroke();
+								ctx.closePath();
+
+								ctx.font = "30px Arial";
+								ctx.fillStyle = "white";
+								ctx.fillText("E", x-10,y+10);
+
+
+								y =  y+radius;
+
+								ctx.beginPath();
+								ctx.strokeStyle = "black";
+								ctx.moveTo(x,y);
+								ctx.lineTo(x,y+30);
+								ctx.stroke();
+								ctx.closePath();
+
+								ctx.beginPath();
+								ctx.fillStyle = "black";
+								ctx.arc(x,y+50,radius,0,2*Math.PI);
+								ctx.fill();
+								ctx.closePath();
+
+								ctx.beginPath();
+								ctx.save();
+								ctx.setLineDash([5,3]);
+								ctx.strokeStyle = removed;
+								ctx.arc(x,y+50,radius+2,0,2*Math.PI);
+								ctx.stroke();
+								ctx.restore();
+								ctx.closePath();
+
+								ctx.font = "30px Arial";
+								ctx.fillStyle = "white";
+								ctx.fillText("0", x-8,y+60);
+
+								y =  y+radius*3;
+
+								ctx.beginPath();
+								ctx.strokeStyle = matched;
+								ctx.moveTo(x,y);
+								ctx.lineTo(x,y+30);
+								ctx.stroke();
+								ctx.closePath();
+
+
+								ctx.beginPath();
+								ctx.save();
+								ctx.setLineDash([5,3]);
+								ctx.strokeStyle = removed;
+								ctx.arc(x,y+55,radius+2,0,2*Math.PI);
+								ctx.stroke();
+								ctx.restore();
+								ctx.closePath();
+
+								ctx.beginPath();
+								ctx.fillStyle = "black";
+								ctx.arc(x,y+55,radius,0,2*Math.PI);
+								ctx.fill();
+								ctx.closePath();		
+
+								ctx.font = "30px Arial";
+								ctx.fillStyle = "white";
+								ctx.fillText("A", x-10,y+65);
+
+								y =  y+radius*3;
+
+								ctx.beginPath();
+								ctx.strokeStyle = "black";
+								ctx.moveTo(x,y);
+								ctx.lineTo(x,y+40);
+								ctx.stroke();
+								ctx.closePath();
+
+								ctx.beginPath();
+								ctx.fillStyle = unmatched;
+								ctx.arc(x,y+60,radius,0,2*Math.PI);
+								ctx.fill();
+								ctx.closePath();
+
+								ctx.beginPath();
+								ctx.strokeStyle = "black";
+								ctx.arc(x,y+60,radius,0,2*Math.PI);
+								ctx.stroke();
+								ctx.closePath();
+
+								ctx.font = "30px Arial";
+								ctx.fillStyle = "white";
+								ctx.fillText("1", x-10,y+70);
+
+
+
+				ctx.beginPath();
+					ctx.fillStyle = "black";
+					ctx.rect(425,65,215,50);
+					ctx.fill();
+					ctx.closePath();
+
+					ctx.font = "30px Arial";
+					ctx.fillStyle = "white";
+					ctx.fillText("M",520,100);
+
+
+						x = 460 ;//197.5
+						y =150;
+
+						letterX = x-9.5;
+						letterY = y+11;
+
+					ctx.beginPath();
+					ctx.fillStyle = "grey";
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.fill();
+					ctx.closePath();
+
+					ctx.beginPath();
+					ctx.save();
+					ctx.setLineDash([5,3]);
+					ctx.strokeStyle = removed;
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.stroke();
+					ctx.restore();
+					ctx.closePath();
+
+
+					ctx.font = "30px Arial"
+					ctx.fillStyle = "white";
+					ctx.fillText("A", letterX, letterY);
+
+					x += 150;
+					letterX = x -9.5;
+
+
+					ctx.beginPath();
+					ctx.fillStyle = "grey";
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.fill();
+					ctx.closePath();
+
+					ctx.beginPath();
+					ctx.save();
+					ctx.setLineDash([5,3]);	
+					ctx.strokeStyle = removed;
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.stroke();
+					ctx.restore();
+					ctx.closePath();
+
+
+					ctx.font = "30px Arial"
+					ctx.fillStyle = "white";
+					ctx.fillText("0", letterX, letterY);
+
+
+					x = 460;
+
+					ctx.beginPath();
+					ctx.strokeStyle = "#4C58FD"
+					ctx.moveTo(x+radius,y);
+					ctx.lineTo(x + 150-radius, y);
+					ctx.stroke();
+
+						x = 460 ;//197.5
+						y +=65;
+
+						letterX = x-9.5;
+						letterY = y+11;
+
+					ctx.beginPath();
+					ctx.fillStyle = "grey";
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.fill();
+					ctx.closePath();
+
+					ctx.beginPath();
+					ctx.strokeStyle = "black";
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.stroke();
+					ctx.closePath();
+
+
+					ctx.font = "30px Arial"
+					ctx.fillStyle = "white";
+					ctx.fillText("B", letterX, letterY);
+
+					x += 150;
+					letterX = x -9.5;
+
+
+					ctx.beginPath();
+					ctx.fillStyle = "grey";
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.fill();
+					ctx.closePath();
+
+					ctx.beginPath();
+					ctx.strokeStyle = "black";
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.stroke();
+					ctx.closePath();
+
+
+					ctx.font = "30px Arial"
+					ctx.fillStyle = "white";
+					ctx.fillText("2", letterX, letterY);
+
+
+					x = 460;
+
+					ctx.beginPath();
+					ctx.strokeStyle = "#4C58FD"
+					ctx.moveTo(x+radius,y);
+					ctx.lineTo(x + 150-radius, y);
+					ctx.stroke();
+
+
+					x = 460;
+
+					ctx.beginPath();
+					ctx.strokeStyle = "#4C58FD"
+					ctx.moveTo(x+radius,y);
+					ctx.lineTo(x + 150-radius, y);
+					ctx.stroke();
+
+						x = 460 ;//197.5
+						y = y +65;
+
+						letterX = x-9.5;
+						letterY = y+11;
+
+					ctx.beginPath();
+					ctx.fillStyle = "grey";
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.fill();
+					ctx.closePath();
+
+					ctx.beginPath();
+					ctx.strokeStyle = "black";
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.stroke();
+					ctx.closePath();
+
+
+					ctx.font = "30px Arial"
+					ctx.fillStyle = "white";
+					ctx.fillText("C", letterX, letterY);
+
+					x += 150;
+					letterX = x -9.5;
+
+
+					ctx.beginPath();
+					ctx.fillStyle = "grey";
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.fill();
+					ctx.closePath();
+
+					ctx.beginPath();
+					ctx.strokeStyle = "black";
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.stroke();
+					ctx.closePath();
+
+
+					ctx.font = "30px Arial"
+					ctx.fillStyle = "white";
+					ctx.fillText("3", letterX, letterY);
+
+
+					x = 460;
+
+					ctx.beginPath();
+					ctx.strokeStyle = "#4C58FD"
+					ctx.moveTo(x+radius,y);
+					ctx.lineTo(x + 150-radius, y);
+					ctx.stroke();
+
+
+						x = 460 ;//197.5
+						y = y +65;
+
+						letterX = x-9.5;
+						letterY = y+11;
+
+					ctx.beginPath();
+					ctx.fillStyle = "grey";
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.fill();
+					ctx.closePath();
+
+					ctx.beginPath();
+					ctx.strokeStyle = "black";
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.stroke();
+					ctx.closePath();
+
+
+					ctx.font = "30px Arial"
+					ctx.fillStyle = "white";
+					ctx.fillText("D", letterX, letterY);
+
+					x += 150;
+					letterX = x -9.5;
+
+
+					ctx.beginPath();
+					ctx.fillStyle = "grey";
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.fill();
+					ctx.closePath();
+
+					ctx.beginPath();
+					ctx.strokeStyle = "black";
+					ctx.arc(x,y,radius,0,2*Math.PI);
+					ctx.stroke();
+					ctx.closePath();
+
+
+					ctx.font = "30px Arial"
+					ctx.fillStyle = "white";
+					ctx.fillText("4", letterX, letterY);
+
+
+					x = 460;
+
+					ctx.beginPath();
+					ctx.strokeStyle = "#4C58FD"
+					ctx.moveTo(x+radius,y);
+					ctx.lineTo(x + 150-radius, y);
+					ctx.stroke();
+
+
+
+	}
+
+
+	function augmentingPath(){
+
+			x = 370;
+			y = 150;
+
+			ctx.beginPath();
+			ctx.fillStyle = unmatched;
+			ctx.arc(x,y,radius,0,2*Math.PI);
+			ctx.fill();
+			ctx.closePath();
+
+			ctx.beginPath();
+			ctx.strokeStyle = "black";
+			ctx.arc(x,y,radius,0,2*Math.PI);
+			ctx.stroke();
+			ctx.closePath();
+
+			ctx.font = "30px Arial";
+			ctx.fillStyle = "white";
+			ctx.fillText("E", x-10,y+10);
+
+
+			y =  y+radius;
+
+			ctx.beginPath();
+			ctx.strokeStyle = "black";
+			ctx.moveTo(x,y);
+			ctx.lineTo(x,y+30);
+			ctx.stroke();
+			ctx.closePath();
+
+			ctx.beginPath();
+			ctx.fillStyle = "black";
+			ctx.arc(x,y+50,radius,0,2*Math.PI);
+			ctx.fill();
+			ctx.closePath();
+
+			ctx.beginPath();
+			ctx.strokeStyle = "black";
+			ctx.arc(x,y+50,radius,0,2*Math.PI);
+			ctx.stroke();
+			ctx.closePath();
+
+			ctx.font = "30px Arial";
+			ctx.fillStyle = "white";
+			ctx.fillText("0", x-8,y+60);
+
+			y =  y+radius*3;
+
+			ctx.beginPath();
+			ctx.strokeStyle = matched;
+			ctx.moveTo(x,y);
+			ctx.lineTo(x,y+30);
+			ctx.stroke();
+			ctx.closePath();
+
+
+			ctx.beginPath();
+			ctx.fillStyle = "black";
+			ctx.arc(x,y+55,radius,0,2*Math.PI);
+			ctx.fill();
+			ctx.closePath();		
+
+			ctx.font = "30px Arial";
+			ctx.fillStyle = "white";
+			ctx.fillText("A", x-10,y+65);
+
+			y =  y+radius*3;
+
+			ctx.beginPath();
+			ctx.strokeStyle = "black";
+			ctx.moveTo(x,y);
+			ctx.lineTo(x,y+40);
+			ctx.stroke();
+			ctx.closePath();
+
+			ctx.beginPath();
+			ctx.fillStyle = unmatched;
+			ctx.arc(x,y+60,radius,0,2*Math.PI);
+			ctx.fill();
+			ctx.closePath();
+
+			ctx.beginPath();
+			ctx.strokeStyle = "black";
+			ctx.arc(x,y+60,radius,0,2*Math.PI);
+			ctx.stroke();
+			ctx.closePath();
+
+			ctx.font = "30px Arial";
+			ctx.fillStyle = "white";
+			ctx.fillText("1", x-10,y+70);
+
+	}
+
+	function matchings2(){
+
+
+
+			ctx.beginPath();
+			ctx.fillStyle = "black";
+			ctx.rect(425,65,215,50);
+			ctx.fill();
+			ctx.closePath();
+
+			ctx.font = "30px Arial";
+			ctx.fillStyle = "white";
+			ctx.fillText("M",520,100);
+
+			
+			
+
+
+
+				x = 460 ;//197.5
+				y =150;
+
+				letterX = x-9.5;
+				letterY = y+11;
+
+			ctx.beginPath();
+			ctx.fillStyle = "grey";
+			ctx.arc(x,y,radius,0,2*Math.PI);
+			ctx.fill();
+			ctx.closePath();
+
+			ctx.beginPath();
+			ctx.strokeStyle = "black";
+			ctx.arc(x,y,radius,0,2*Math.PI);
+			ctx.stroke();
+			ctx.closePath();
+
+
+			ctx.font = "30px Arial"
+			ctx.fillStyle = "white";
+			ctx.fillText("A", letterX, letterY);
+
+			x += 150;
+			letterX = x -9.5;
+
+
+			ctx.beginPath();
+			ctx.fillStyle = "grey";
+			ctx.arc(x,y,radius,0,2*Math.PI);
+			ctx.fill();
+			ctx.closePath();
+
+			ctx.beginPath();
+			ctx.strokeStyle = "black";
+			ctx.arc(x,y,radius,0,2*Math.PI);
+			ctx.stroke();
+			ctx.closePath();
+
+
+			ctx.font = "30px Arial"
+			ctx.fillStyle = "white";
+			ctx.fillText("0", letterX, letterY);
+
+
+			x = 460;
+
+			ctx.beginPath();
+			ctx.strokeStyle = "#4C58FD"
+			ctx.moveTo(x+radius,y);
+			ctx.lineTo(x + 150-radius, y);
+			ctx.stroke();
+
+				x = 460 ;//197.5
+				y +=65;
+
+				letterX = x-9.5;
+				letterY = y+11;
+
+			ctx.beginPath();
+			ctx.fillStyle = "grey";
+			ctx.arc(x,y,radius,0,2*Math.PI);
+			ctx.fill();
+			ctx.closePath();
+
+			ctx.beginPath();
+			ctx.strokeStyle = "black";
+			ctx.arc(x,y,radius,0,2*Math.PI);
+			ctx.stroke();
+			ctx.closePath();
+
+
+			ctx.font = "30px Arial"
+			ctx.fillStyle = "white";
+			ctx.fillText("B", letterX, letterY);
+
+			x += 150;
+			letterX = x -9.5;
+
+
+			ctx.beginPath();
+			ctx.fillStyle = "grey";
+			ctx.arc(x,y,radius,0,2*Math.PI);
+			ctx.fill();
+			ctx.closePath();
+
+			ctx.beginPath();
+			ctx.strokeStyle = "black";
+			ctx.arc(x,y,radius,0,2*Math.PI);
+			ctx.stroke();
+			ctx.closePath();
+
+
+			ctx.font = "30px Arial"
+			ctx.fillStyle = "white";
+			ctx.fillText("2", letterX, letterY);
+
+
+			x = 460;
+
+			ctx.beginPath();
+			ctx.strokeStyle = "#4C58FD"
+			ctx.moveTo(x+radius,y);
+			ctx.lineTo(x + 150-radius, y);
+			ctx.stroke();
+
+
+			x = 460;
+
+			ctx.beginPath();
+			ctx.strokeStyle = "#4C58FD"
+			ctx.moveTo(x+radius,y);
+			ctx.lineTo(x + 150-radius, y);
+			ctx.stroke();
+
+				x = 460 ;//197.5
+				y = y +65;
+
+				letterX = x-9.5;
+				letterY = y+11;
+
+			ctx.beginPath();
+			ctx.fillStyle = "grey";
+			ctx.arc(x,y,radius,0,2*Math.PI);
+			ctx.fill();
+			ctx.closePath();
+
+			ctx.beginPath();
+			ctx.strokeStyle = "black";
+			ctx.arc(x,y,radius,0,2*Math.PI);
+			ctx.stroke();
+			ctx.closePath();
+
+
+			ctx.font = "30px Arial"
+			ctx.fillStyle = "white";
+			ctx.fillText("C", letterX, letterY);
+
+			x += 150;
+			letterX = x -9.5;
+
+
+			ctx.beginPath();
+			ctx.fillStyle = "grey";
+			ctx.arc(x,y,radius,0,2*Math.PI);
+			ctx.fill();
+			ctx.closePath();
+
+			ctx.beginPath();
+			ctx.strokeStyle = "black";
+			ctx.arc(x,y,radius,0,2*Math.PI);
+			ctx.stroke();
+			ctx.closePath();
+
+
+			ctx.font = "30px Arial"
+			ctx.fillStyle = "white";
+			ctx.fillText("3", letterX, letterY);
+
+
+			x = 460;
+
+			ctx.beginPath();
+			ctx.strokeStyle = "#4C58FD"
+			ctx.moveTo(x+radius,y);
+			ctx.lineTo(x + 150-radius, y);
+			ctx.stroke();
+
+
+				x = 460 ;//197.5
+				y = y +65;
+
+				letterX = x-9.5;
+				letterY = y+11;
+
+			ctx.beginPath();
+			ctx.fillStyle = "grey";
+			ctx.arc(x,y,radius,0,2*Math.PI);
+			ctx.fill();
+			ctx.closePath();
+
+			ctx.beginPath();
+			ctx.strokeStyle = "black";
+			ctx.arc(x,y,radius,0,2*Math.PI);
+			ctx.stroke();
+			ctx.closePath();
+
+
+			ctx.font = "30px Arial"
+			ctx.fillStyle = "white";
+			ctx.fillText("D", letterX, letterY);
+
+			x += 150;
+			letterX = x -9.5;
+
+
+			ctx.beginPath();
+			ctx.fillStyle = "grey";
+			ctx.arc(x,y,radius,0,2*Math.PI);
+			ctx.fill();
+			ctx.closePath();
+
+			ctx.beginPath();
+			ctx.strokeStyle = "black";
+			ctx.arc(x,y,radius,0,2*Math.PI);
+			ctx.stroke();
+			ctx.closePath();
+
+
+			ctx.font = "30px Arial"
+			ctx.fillStyle = "white";
+			ctx.fillText("4", letterX, letterY);
+
+
+			x = 460;
+
+			ctx.beginPath();
+			ctx.strokeStyle = "#4C58FD"
+			ctx.moveTo(x+radius,y);
+			ctx.lineTo(x + 150-radius, y);
+			ctx.stroke();
+
+
+
+	}
+
+	function stepSeven(){
+
+		ctx.clearRect(0,0,canvas.width,canvas.height);
+			x = canvas.width/3 +20 ;//197.5
+			y =160;
+			letterX = x-9.5;
+			letterY = y+11;
+			radius = 25;
+			tableX = 400;
+			tableY = 140;
+			ballColour = "black";
+
+			tableWidth = 250;
+			tableHeight = 400;
+
+
+		drawText();
+		drawDiagram2(x);
+		drawEdgesWithMatchings2(x);
+
+
+
+		ctx.fontStyle = "20px Arial";
+		ctx.fillStyle = "black";
+		ctx.fillText("By: Gabriella Gerges", 380,690);	
+
+
+
+	}
+
+	</script>
+	
+
+</body>
+</html>

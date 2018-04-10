@@ -1,0 +1,29 @@
+body{
+	background-color: #444444;
+    color: #df7e7e;
+    font-size: large;
+    background-image: url("../images/bouncingseal.gif");
+}
+
+p{
+	font-family: cursive;
+	border: 2px blue dashed;
+	border-radius: 15px;
+}
+p.class1, class2{
+	color: red;
+}
+
+p img{
+	width: 10%;
+}
+.class2{
+	background-color: purple;
+	border: 1px black dashed;
+}
+
+#paragraph1{
+	color: white;
+	border-radius: px;
+	background-color: black;
+}

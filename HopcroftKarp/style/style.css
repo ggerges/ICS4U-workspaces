@@ -1,0 +1,75 @@
+#header{
+
+	padding-bottom: 15px;
+	border-style: solid;
+	border-color: black;
+	border-radius: 5px;
+	text-align: center;
+
+}
+
+
+
+
+
+#keyTerms {
+	
+	margin-top: 15px;
+	padding-top: 5px;
+	padding-left: 15px;
+	padding-right: 15px;
+	width: 20%;
+	position: block;
+
+	border-style: solid;
+	border-color: black;
+
+	text-overflow: scroll;
+	
+
+}
+
+#introduction{
+	padding-top: 5px;
+	padding-left: 15px;
+	padding-right: 15px;
+	margin-top: -75.3%; 
+	margin-left: 23%;
+	position: block;
+
+	border-style: solid;
+	border-color: black;
+	width: 5	0%;
+}
+
+#introduction li{
+	padding : 10px;
+}
+
+#myCanvas{
+	
+	margin-left: 23% ;
+	margin-top: -32%;
+	
+	background-color: white;	
+	
+	border-style: solid;
+	border-width: 2px;
+}
+
+#buttons{
+	list-style-type: none;
+	position: block;
+	margin-top: ;
+	margin-left: 73%; 	
+}
+.around{
+	margin-top: 10px;
+	width: 300px;
+	padding:10px;
+}
+
+
+html{
+	margin:0;
+}

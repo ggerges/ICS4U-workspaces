@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<script src="js/js.js">
+	</script>
+	<title>Music Quiz</title>
+	<link href="css/css.css" rel="stylesheet" type="text/css">
+</head>
+<body>
+	<div id="header">
+		<h1>Which Music Teacher are you?</h1>
+	</div><br>
+	<div id="content">
+		<h3>Please select which item you would buy in a store.</h3>
+		<ol class="Radiobutton" style="list-style-type: none;">
+			<li><input name="WhichItem" type="radio" value="Kraft">Kraft Dinner</li>
+			<li><input name="WhichItem" type="radio" value="Sparkles">Sparkles</li>
+			<li><input name="WhichItem" type="radio" value=" Rabbit_Stew">Rabbit
+			Stew</li>
+			<li><input name="WhichItem" type="radio" value="tie">A fresh tie</li>
+			<li><input name="WhichItem" type="radio" value="Hair">Hair brush</li>
+		</ol>
+		<h3>Please select which music piece you prefer</h3>
+		<span class="no"><ol class="Radiobutton" style="list-style-type: none;">
+			<li>
+				<input name="music" type="radio" value="Glee"><audio controls=
+				""><source src="music/glee.mp3" type="audio/mp3"></audio>
+			</li>
+			<li>
+				<input name="music" type="radio" value="Atlantis"><audio controls=
+				""><source src="music/atlantis.mp3" type="audio/mp3"></audio>
+			</li>
+			<li>
+				<input name="music" type="radio" value="Spy"><audio controls=
+				""><source src="music/spy.mp3" type="audio/mp3"></audio>
+			</li>
+			<li>
+				<input name="music" type="radio" value="Jazz"><audio controls=
+				""><source src="music/plenty.mp3" type="audio/mp3"></audio>
+			</li>
+			<li>
+				<input name="music" type="radio" value="HarryPotter"><audio controls=
+				""><source src="music/harry.mp3" type="audio/mp3"></audio>
+			</li>
+		</ol></span>
+		<h3>On which day would you rather sleep in?</h3>
+		<div id="move">
+		<select id="selectQuestion">
+			<option value="Monday">
+				Monday
+			</option>
+			<option value="Tuesday">
+				Tuesday
+			</option>
+			<option value="Friday">
+				Friday
+			</option>
+			<option value="Saturday">
+				Saturday
+			</option>
+		</select>
+		</div>
+		<h3>Please select what you would do over summer/winter break.</h3>
+		<ol class="Radiobutton" style="list-style-type: none;">
+			<li><input name="summer" type="radio" value="bunny">Play with Bunnies</li>
+			<li><input name="summer" type="radio" value="Relax">Relax with Family</li>
+			<li><input name="summer" type="radio" value="Engage">Get Engaged</li>
+			<li><input name="summer" type="radio" value="Prepare">Arrange Upcoming
+			Concerts</li>
+		</ol>
+		<h3>What would you rather be doing in the Future?</h3>
+		<ol class="Radiobutton" style="list-style-type: none;">
+			<li><input name="future" type="radio" value="Ballet">Picking up my Daughter
+			from Ballet :)</li>
+			<li><input name="future" type="radio" value="Married">Get Married</li>
+			<li><input name="future" type="radio" value="Children">Make fun of
+			children</li>
+			<li><input name="future" type="radio" value="Rabbit">Visit the animal
+			shelter to see the rabbits</li>
+		</ol>
+		<h3>Please select what you would Order on Amazon.</h3>
+		<ol class="Radiobutton" style="list-style-type: none;">
+			<li><input name="amazon" type="radio" value="sparkle">Sequence Bed Sheets.
+			Yes.</li>
+			<li><input name="amazon" type="radio" value="bbq">Barbeque. Duh.</li>
+			<li><input name="amazon" type="radio" value="cage">Bunny Cage. For future
+			bunnies.</li>
+			<li><input name="amazon" type="radio" value="conductor">"Swag" tie</li>
+		</ol>
+		<h3>How would you dress everyday?</h3>
+		<ol class="Radiobutton" style="list-style-type: none;">
+			<li><input name="dress" type="radio" value="yes">FABULOUS GO BIG OR GO HOME.
+			SPARKLES EVERYWHERE.</li>
+			<li><input name="dress" type="radio" value="no">T-shirt. pants. shoes.</li>
+		</ol>
+		<h3>I like to teach...</h3>
+		<ol class="Radiobutton" style="list-style-type: none;">
+			<li><input name="teach" type="radio" value="yes">Children</li>
+			<li><input name="teach" type="radio" value="no">Older Kids</li>
+		</ol>
+		<h3>I have.....</h3>
+		<ol class="Radiobutton" style="list-style-type: none;">
+			<li><input name="have" type="radio" value="yes">A sparkly baton.</li>
+			<li>
+				<input name="have" type="radio" value="no">An uncle that you dont want
+				knocking on your door
+				<h3>Its music test day...What do you tell the students?</h3>
+				<ol class="Radiobutton" style="list-style-type: none;">
+					<li><input name="test" type="radio" value="yes">Its not worth that much,
+					just do it!</li>
+					<li><input name="test" type="radio" value="no">How does my hair look?</li>
+				</ol>	
+				<input class="button" onclick="processSubmit();" type="button" value="Submit">
+			</div>
+
+	<div id="footer"></div>
+</body>
+</html>

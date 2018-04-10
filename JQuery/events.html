@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>JQuery Selectors</title>
+	<script type="text/javascript" src = "jquery-3.3.1.min.js"></script>
+	<style>
+		body{
+			font-size: 17px;
+			font-family: arial;
+			background: #CFCACA;
+			line-height: 1.5em;
+
+		}
+		header{
+			background: black;
+			color: white;
+			padding:20px;
+			text-align: center;
+			border-bottom: 4px black solid;
+			margin-bottom: 10px;
+		}
+		#container{
+			width : 90%;
+			margin: auto;
+			padding: 
+		}
+	</style>
+</head>
+<body>
+	<header>
+		
+		<h1>JQuery stuff</h1>
+			</header>
+		<div id = "container">
+			
+			<h1>MouseEvents</h1>
+			<button id= "btn1">Button 1</button>
+				<button id="btn2">Button 2</button>
+				<p class = 'para1'>mpressed and uncompressed copies of jQuery files are available. The uncompressed file is best used during development or debugging; the compressed file saves bandwidth and improves performance in production. You can also download a sourcemap file for use when debugging with a compressed file. The map file is not required for users to run jQuery, it just </p>
+
+				<form>
+					<label>Name</label>
+					<input type="text" id="name" name="name">
+					<br>
+					<label>Email</label><br>
+					<input type="email" id="email" name="email">
+					<br>
+					<label>Gender</label><br>
+					<select id ="gender" name="gender">
+						<option value = 'male'>Male</option>
+						<option value = 'female'>Female</option>
+					</select><br>
+					<input type="submit" value="Submit">
+				</form>
+
+
+		</div>
+
+	
+
+		<script>
+			//$('document').ready(function()) waits till ready
+		/*	$('#btn1').click(function(){
+				//$('.para1').hide();
+				$('.para1').toggle();
+			});
+			$('#btn2').on('click',function(){
+				$('.para1').show();
+
+			
+			$('#btn1').dblclick(function(){
+				$('.para1').toggle();
+			})
+
+			$('#btn1').hover(function(){ //on mouse enter and mouse leave
+				$('.para1').toggle();
+			})
+			})
+			*/
+
+			$('input').focus(function(){
+				alert("focus");
+			});
+
+
+
+		</script>
+
+</body>
+
+
+	</html>
